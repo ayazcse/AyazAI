@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AyazAI: Future Chat Interface</title>
+    <title>AyazAI: Local Chat Interface</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -16,14 +16,18 @@
         .container {
             max-width: 1000px;
         }
+        /* Adjusted height for better mobile viewing */
         .chat-container {
             height: 70vh;
-            max-height: 600px;
+            max-height: 700px; 
         }
         /* Shared Bubble Styling */
         .user-bubble, .model-bubble {
             padding: 0.75rem 1.25rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word; /* Ensure text wraps */
+            overflow-wrap: break-word;
+            max-width: 90%; /* Max width for bubbles */
         }
 
         /* Light Mode Bubbles - Sharp and Clean */
@@ -37,6 +41,7 @@
             background-color: #f3f4f6; /* Gray-100 */
             color: #1f2937; /* Gray-800 */
             border-radius: 1rem 1rem 1rem 0.25rem;
+            margin-right: auto;
         }
         
         /* Dark Mode Bubbles - High Contrast & Neon */
@@ -52,6 +57,7 @@
             background-color: #1f2937; /* Gray-800 */
             color: #d1d5db; /* Gray-300 */
             border-radius: 1rem 1rem 1rem 0.25rem;
+            margin-right: auto;
             /* Subtle glow */
             box-shadow: 0 0 5px rgba(126, 34, 206, 0.3);
         }
@@ -71,11 +77,11 @@
 <body class="p-4 md:p-8 flex items-center justify-center bg-gray-950 dark:bg-black transition-colors">
 
     <div class="container mx-auto">
-        <header class="text-center mb-8 flex justify-between items-center">
+        <header class="text-center mb-6 flex justify-between items-center">
             <!-- Action Group: Theme & New Chat -->
             <div class="flex space-x-2">
                 <!-- Theme Toggle -->
-                <button id="theme-toggle" class="p-3 rounded-full bg-gray-800 dark:bg-gray-700 text-gray-200 dark:text-cyan-400 transition-colors shadow-xl hover:shadow-cyan-500/50">
+                <button id="theme-toggle" class="p-3 rounded-full bg-gray-800 dark:bg-gray-700 text-gray-200 dark:text-cyan-400 transition-colors shadow-xl hover:shadow-cyan-500/50" onclick="toggleTheme()">
                     <!-- Sun Icon (Light Mode) -->
                     <svg id="sun-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     <!-- Moon Icon (Dark Mode) -->
@@ -94,15 +100,18 @@
             <!-- Gradient Title - The 'AyazAI' Vibe -->
             <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-600 tracking-wider">AyazAI</h1>
             
-            <span id="user-info" class="text-sm text-gray-500 dark:text-gray-400 p-2 border border-gray-700 rounded-lg">Loading...</span>
+            <!-- Removed UID span -->
+            <span id="system-status" class="text-sm text-gray-500 dark:text-gray-400 p-2 border border-gray-700 rounded-lg">Status: Ready</span>
+
         </header>
 
         <!-- Main Chat Box: Floating Panel Effect -->
         <div class="bg-white dark:bg-gray-900 p-4 md:p-6 rounded-2xl shadow-2xl dark:shadow-violet-500/20 flex flex-col transition-colors border border-gray-200 dark:border-gray-800">
             <!-- Chat History Display -->
             <div id="chat-history" class="chat-container overflow-y-auto mb-4 p-4 md:p-6 border border-gray-300 dark:border-gray-700 rounded-xl flex flex-col space-y-4 bg-gray-50 dark:bg-gray-950">
-                <div class="model-bubble p-3 shadow-md">
-                    <span id="initial-message">Connecting to database and authenticating...</span>
+                <!-- Initial Welcome Message -->
+                <div id="initial-message-box" class="model-bubble p-3 shadow-md">
+                    <span id="initial-message">Hello! I'm AyazAI, a local conversational engine. How can I assist you today?</span>
                 </div>
                 
                 <!-- Loading Indicator -->
@@ -166,26 +175,13 @@
     </div>
 
     <script type="module">
-        // --- Firebase Imports ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
         // --- API Key Comment ---
         const apiKey = "AIzaSyDmzDzuEiSMd3ZR9YT_f1T2EPz24mgbw5g"; 
-
-        // --- Firebase/Canvas Configuration (Required for environment) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // --- Global State ---
         let userLocation = null; // Stores {latitude: N, longitude: E}
         let uploadedImage = null; // Stores {data: base64, mimeType: string}
-        let db = null;
-        let auth = null;
-        let userId = null;
-        let isAuthReady = false;
+        let chatHistory = []; // Local memory for the session
         
         // --- DOM Elements ---
         const userInput = document.getElementById('user-input');
@@ -195,7 +191,8 @@
         const loadingIndicator = document.getElementById('loading-indicator');
         const errorModal = document.getElementById('error-modal');
         const errorMessage = document.getElementById('error-message');
-        const userInfoSpan = document.getElementById('user-info');
+        const systemStatusSpan = document.getElementById('system-status');
+        const initialMessageBox = document.getElementById('initial-message-box');
         const initialMessageSpan = document.getElementById('initial-message');
         const themeToggleBtn = document.getElementById('theme-toggle');
         const sunIcon = document.getElementById('sun-icon');
@@ -203,172 +200,11 @@
         const imageInput = document.getElementById('image-input');
         const imagePreview = document.getElementById('image-preview');
         const imagePreviewArea = document.getElementById('image-preview-area');
-        const newChatBtn = document.getElementById('new-chat-btn');
-
-        // --- Chat State (Memory - This is now loaded from Firestore) ---
-        let chatHistory = []; 
 
         // --- API Constants ---
         const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
-        const SYSTEM_PROMPT = "You are a friendly, concise, and helpful conversational assistant. Maintain context and memory throughout the conversation. For any query requiring current or real-time information (like weather, news, or recent events), you must use your search tool. Your persona is a high-tech AI named AyazAI.";
-
-        // --- Firebase Initialization and Auth ---
-
-        /**
-         * Initializes Firebase and authenticates the user.
-         */
-        async function initFirebase() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        // Display only the first 8 characters of the userId for a clean UI, but log the full ID
-                        userInfoSpan.textContent = `UID: ${userId.substring(0, 8)}...`;
-                        console.log(`Authenticated User ID: ${userId}`);
-                        isAuthReady = true;
-                        
-                        // Start listening to the chat history
-                        listenToChatHistory(); 
-                        initialMessageSpan.textContent = "Welcome back, AyazAI systems online. Loading history...";
-                    } else {
-                        // Sign in using the custom token or anonymously
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                displayError(`Failed to initialize application: ${error.message}`);
-            }
-        }
-        
-        /**
-         * Sets up the real-time listener for the chat history from Firestore.
-         */
-        function listenToChatHistory() {
-            if (!db || !userId) return;
-
-            // Use the standard private path for chat history
-            const chatCollectionPath = `/artifacts/${appId}/users/${userId}/chats`;
-            const chatsRef = collection(db, chatCollectionPath);
-            
-            // Query to fetch messages ordered by timestamp
-            const q = query(chatsRef, orderBy('timestamp', 'asc')); 
-
-            onSnapshot(q, (snapshot) => {
-                chatHistory = []; // Reset local history
-                chatHistoryDiv.innerHTML = ''; // Clear chat display
-
-                snapshot.docs.forEach(doc => {
-                    const data = doc.data();
-                    const role = data.role;
-                    const text = data.text;
-                    const image = data.image; // Check for image data
-
-                    chatHistory.push({ role, parts: [{ text }] });
-
-                    // Handle image if present
-                    if (image && image.data && image.mimeType) {
-                        chatHistory[chatHistory.length - 1].parts.unshift({
-                            inlineData: {
-                                data: image.data,
-                                mimeType: image.mimeType
-                            }
-                        });
-                        displayMessage(text, role, `data:${image.mimeType};base64,${image.data}`);
-                    } else {
-                        displayMessage(text, role);
-                    }
-                });
-
-                // Control initial message display
-                const initialMsgContainer = initialMessageSpan.parentElement;
-                if (chatHistory.length > 0) {
-                    initialMsgContainer.style.display = 'none';
-                } else {
-                    initialMsgContainer.style.display = 'block';
-                    initialMessageSpan.textContent = "Hello! I'm AyazAI, your personal conversational engine. How can I assist you today?";
-                }
-
-                chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
-            }, (error) => {
-                console.error("Error listening to chat history:", error);
-                displayError(`Error loading history: ${error.message}`);
-            });
-        }
-
-        /**
-         * Saves a message to the Firestore database.
-         * @param {string} role - The role ('user' or 'model').
-         * @param {string} text - The message content.
-         * @param {object | null} image - Optional image object {data: base64, mimeType: string}.
-         */
-        async function saveMessage(role, text, image = null) {
-            if (!db || !userId) return;
-
-            const chatCollectionPath = `/artifacts/${appId}/users/${userId}/chats`;
-            const data = {
-                role,
-                text,
-                timestamp: serverTimestamp(),
-                userId: userId,
-            };
-            if (image) {
-                data.image = image;
-            }
-
-            try {
-                // saveMessage does NOT trigger display, the onSnapshot listener does.
-                await addDoc(collection(db, chatCollectionPath), data);
-            } catch (error) {
-                console.error("Error saving message:", error);
-                displayError(`Failed to save message: ${error.message}`);
-            }
-        }
-
-        /**
-         * Clears all chat history documents for the current user.
-         */
-        async function clearHistory() {
-            if (!db || !userId) return;
-            
-            if (!confirm('Are you sure you want to start a new chat? This will permanently delete ALL messages in your history!')) {
-                return;
-            }
-
-            try {
-                newChatBtn.disabled = true;
-                const chatCollectionPath = `/artifacts/${appId}/users/${userId}/chats`;
-                const q = query(collection(db, chatCollectionPath));
-                
-                // Get all documents and delete them one by one
-                const snapshot = await getDocs(q);
-                const deletePromises = [];
-                snapshot.forEach((doc) => {
-                    deletePromises.push(deleteDoc(doc.ref));
-                });
-
-                await Promise.all(deletePromises);
-                
-                // onSnapshot will handle clearing the UI
-                console.log("Chat history cleared successfully.");
-
-            } catch (error) {
-                console.error("Error clearing chat history:", error);
-                displayError(`Failed to clear history: ${error.message}`);
-            } finally {
-                newChatBtn.disabled = false;
-            }
-        }
-
+        const SYSTEM_PROMPT = "You are a friendly, concise, and helpful conversational assistant. Maintain context and memory throughout the conversation. For any query requiring current or real-time information (like weather, news, or recent events), you must use your search tool. Your persona is a high-tech AI named AyazAI. Since this application runs locally without a database, your memory only lasts for this session.";
 
         // --- Theme Management ---
 
@@ -389,14 +225,17 @@
             localStorage.setItem('theme', theme);
         }
 
+        /**
+         * Toggles the current theme.
+         */
+        window.toggleTheme = function() {
+            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            applyTheme(newTheme);
+        }
+        
         // Load theme preference on startup
         const preferredTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         applyTheme(preferredTheme);
-
-        themeToggleBtn.addEventListener('click', () => {
-            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-            applyTheme(newTheme);
-        });
         
         // --- Utility Functions ---
 
@@ -408,6 +247,7 @@
             errorMessage.textContent = message;
             errorModal.classList.remove('hidden');
             loadingIndicator.classList.add('hidden');
+            systemStatusSpan.textContent = "Status: Error";
         }
 
         /**
@@ -444,6 +284,11 @@
          * @param {string | null} imageUrl - Optional image URL to display above the text.
          */
         function displayMessage(text, role, imageUrl = null) {
+            // Hide initial welcome message box if we display a real message
+            if (chatHistory.length > 0) {
+                initialMessageBox.classList.add('hidden');
+            }
+
             const messageWrapper = document.createElement('div');
             messageWrapper.className = `flex flex-col p-3 shadow-md ${role}-bubble`;
             
@@ -459,8 +304,50 @@
             messageWrapper.appendChild(textSpan);
             
             chatHistoryDiv.appendChild(messageWrapper);
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; // Auto-scroll
         }
         
+        /**
+         * Saves a message to the local chatHistory array and triggers display.
+         * @param {string} role - The role ('user' or 'model').
+         * @param {string} text - The message content.
+         * @param {object | null} image - Optional image object {data: base64, mimeType: string}.
+         */
+        async function saveMessage(role, text, image = null) {
+            // 1. Prepare message parts for local history (context for API)
+            const parts = [{ text }];
+            if (image) {
+                parts.unshift({ inlineData: { data: image.data, mimeType: image.mimeType } });
+            }
+            const message = { role, parts };
+            
+            // 2. Push to local memory
+            chatHistory.push(message);
+
+            // 3. Directly display the message
+            const imageUrl = image ? `data:${image.mimeType};base64,${image.data}` : null;
+            displayMessage(text, role, imageUrl);
+        }
+
+        /**
+         * Clears all local chat history.
+         */
+        window.clearHistory = function() {
+            if (!confirm('Are you sure you want to start a new chat? This will clear all messages in your local memory for this session.')) {
+                return;
+            }
+            chatHistory = []; // Clear local array
+            chatHistoryDiv.innerHTML = ''; // Clear display
+            
+            // Re-display initial welcome message
+            initialMessageBox.classList.remove('hidden');
+            chatHistoryDiv.appendChild(initialMessageBox);
+
+            systemStatusSpan.textContent = "Status: New Chat";
+            console.log("Chat history cleared locally.");
+        }
+
+
         // --- Image Handling ---
 
         /**
@@ -505,18 +392,13 @@
         }
 
         // --- Geolocation Functionality ---
-        function getLocation() {
+        window.getLocation = function() {
             if (!navigator.geolocation) {
                 displayError("Geolocation is not supported by your browser.");
                 return;
             }
 
-            // Custom UI behavior for location request (simplified to use only console/text status for non-blocking UI)
-            const locationStatus = document.createElement('div');
-            locationStatus.textContent = "Requesting location coordinates...";
-            locationStatus.className = "text-center text-sm text-gray-500 dark:text-gray-400 my-2";
-            chatHistoryDiv.appendChild(locationStatus);
-            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+            systemStatusSpan.textContent = "Status: Requesting Location...";
             
             locationBtn.disabled = true;
             locationBtn.classList.add('opacity-50');
@@ -527,7 +409,7 @@
                         latitude: position.coords.latitude.toFixed(4),
                         longitude: position.coords.longitude.toFixed(4)
                     };
-                    locationStatus.textContent = `Location Status: Connected (Lat: ${userLocation.latitude}, Lon: ${userLocation.longitude}).`;
+                    systemStatusSpan.textContent = `Location: Lat ${userLocation.latitude}, Lon ${userLocation.longitude}`;
                     
                     locationBtn.disabled = false;
                     // Change to a neon-like cyan color on success
@@ -541,9 +423,9 @@
 
                     let errorMsg = "Could not retrieve location data.";
                     if (error.code === error.PERMISSION_DENIED) {
-                        errorMsg = "Access Denied. Please enable location permissions in your browser.";
+                        errorMsg = "Access Denied.";
                     }
-                    locationStatus.textContent = `Location Status: Error (${errorMsg})`;
+                    systemStatusSpan.textContent = `Status: Location Error (${errorMsg})`;
                     userLocation = null; 
                 }
             );
@@ -555,21 +437,15 @@
          * Main function to send a message and get an AI response.
          */
         window.sendMessage = async function() {
-            if (!isAuthReady) {
-                displayError("System not authorized. Please wait for connection or refresh.");
-                return;
-            }
-
             const userQuery = userInput.value.trim();
-            // Allow sending if there is text OR an image uploaded
             if (!userQuery && !uploadedImage) return;
 
             // --- UI State: User Message & Loading ---
-            userInput.value = ''; // Clear input field
+            userInput.value = ''; 
             sendBtn.disabled = true;
             sendBtn.classList.add('opacity-70', 'cursor-not-allowed');
             loadingIndicator.classList.remove('hidden');
-            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; // Scroll to bottom before sending
+            systemStatusSpan.textContent = "Status: Thinking...";
 
             // 1. Create the parts array for the API payload
             let parts = [];
@@ -593,18 +469,17 @@
             parts.push({ text: promptWithLocation });
 
 
-            // 2. Save the user's message to Firestore (this triggers display via onSnapshot)
+            // 2. Save the user's message to local memory/UI
             await saveMessage('user', userQuery || "Image attached.", uploadedImage);
             
-            // Clear image immediately after saving for the user session
+            // Clear image immediately after saving for the session
             clearImage();
 
             // 3. Prepare chat history for API (context)
-            // The history is always guaranteed to be up-to-date due to the onSnapshot listener
             // Add the new user message to the context for the AI call
-            const contentsForApi = [...chatHistory, { role: 'user', parts: parts }];
+            const contentsForApi = [...chatHistory];
             
-            // Limit context to the last 10 parts for speed
+            // Limit context to the last 10 turns (user + model messages) for speed
             const limitedContentsForApi = contentsForApi.slice(-10);
 
             const payload = {
@@ -631,7 +506,7 @@
                     throw new Error("Received an empty or malformed response from the model.");
                 }
                 
-                // 4. Save the model response to Firestore (this triggers display via onSnapshot)
+                // 4. Save the model response to local memory/UI
                 await saveMessage('model', modelResponseText);
 
             } catch (error) {
@@ -641,12 +516,10 @@
                 loadingIndicator.classList.add('hidden');
                 sendBtn.disabled = false;
                 sendBtn.classList.remove('opacity-70', 'cursor-not-allowed');
-                userInput.focus(); // Keep focus on the input box
+                userInput.focus();
+                systemStatusSpan.textContent = "Status: Ready";
             }
         }
-        
-        // --- Bootstrap ---
-        initFirebase();
     </script>
 </body>
 </html>
