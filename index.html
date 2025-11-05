@@ -3,40 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gen AI Chat with Memory</title>
+    <title>AyazAI: Future Chat Interface</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom CSS for Inter font and chat aesthetics */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
             min-height: 100vh;
+            transition: background-color 0.4s;
         }
         .container {
-            max-width: 900px;
+            max-width: 1000px;
         }
         .chat-container {
-            height: 70vh; /* Set a fixed height for the chat area */
+            height: 70vh;
             max-height: 600px;
         }
-        .user-bubble {
-            background-color: #4f46e5; /* Indigo-600 */
+        /* Shared Bubble Styling */
+        .user-bubble, .model-bubble {
+            padding: 0.75rem 1.25rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Light Mode Bubbles - Sharp and Clean */
+        .light .user-bubble {
+            background-color: #7c3aed; /* Violet-600 */
             color: white;
             border-radius: 1rem 1rem 0.25rem 1rem;
-            max-width: 80%;
-            align-self: flex-end;
             margin-left: auto;
         }
-        .model-bubble {
-            background-color: #e5e7eb; /* Gray-200 */
+        .light .model-bubble {
+            background-color: #f3f4f6; /* Gray-100 */
             color: #1f2937; /* Gray-800 */
             border-radius: 1rem 1rem 1rem 0.25rem;
-            max-width: 80%;
-            align-self: flex-start;
         }
+        
+        /* Dark Mode Bubbles - High Contrast & Neon */
+        .dark .user-bubble {
+            background-color: #22d3ee; /* Cyan-400 */
+            color: #111827; /* Dark text for contrast */
+            border-radius: 1rem 1rem 0.25rem 1rem;
+            margin-left: auto;
+            /* Neon effect on background for a future vibe */
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.5); 
+        }
+        .dark .model-bubble {
+            background-color: #1f2937; /* Gray-800 */
+            color: #d1d5db; /* Gray-300 */
+            border-radius: 1rem 1rem 1rem 0.25rem;
+            /* Subtle glow */
+            box-shadow: 0 0 5px rgba(126, 34, 206, 0.3);
+        }
+
+        /* Loader with a neon touch */
         .loader {
-            border-top-color: #4f46e5;
+            border-top-color: #a78bfa; /* Violet-400 */
             animation: spin 1s ease-in-out infinite;
         }
         @keyframes spin {
@@ -45,19 +67,42 @@
         }
     </style>
 </head>
-<body class="p-4 md:p-8 flex items-center justify-center">
+<!-- Applying deep space background and gradient text colors -->
+<body class="p-4 md:p-8 flex items-center justify-center bg-gray-950 dark:bg-black transition-colors">
 
     <div class="container mx-auto">
-        <header class="text-center mb-6">
-            <h1 class="text-3xl font-extrabold text-indigo-700">Gen AI Chat with Memory (Location-Aware)</h1>
-            <p class="mt-1 text-lg text-gray-600">Contextual conversation using the Gemini API.</p>
+        <header class="text-center mb-8 flex justify-between items-center">
+            <!-- Action Group: Theme & New Chat -->
+            <div class="flex space-x-2">
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="p-3 rounded-full bg-gray-800 dark:bg-gray-700 text-gray-200 dark:text-cyan-400 transition-colors shadow-xl hover:shadow-cyan-500/50">
+                    <!-- Sun Icon (Light Mode) -->
+                    <svg id="sun-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <!-- Moon Icon (Dark Mode) -->
+                    <svg id="moon-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
+                
+                <!-- New Chat Button (Clear History) -->
+                <button id="new-chat-btn" 
+                        class="p-3 rounded-full bg-red-600 dark:bg-red-700 text-white transition-colors shadow-xl hover:shadow-red-500/50 hover:bg-red-700" 
+                        onclick="clearHistory()">
+                    <!-- Trash/New Icon -->
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.387 7.054a2 2 0 01-1.995 2.5l-2.673-.535a2 2 0 01-1.995-2.5L9.26 9m1.06 4.676l-1.06-1.06M12 6h6"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5v-1a1 1 0 011-1h4a1 1 0 011 1v1M5 7h14a1 1 0 011 1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8a1 1 0 011-1z"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Gradient Title - The 'AyazAI' Vibe -->
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-600 tracking-wider">AyazAI</h1>
+            
+            <span id="user-info" class="text-sm text-gray-500 dark:text-gray-400 p-2 border border-gray-700 rounded-lg">Loading...</span>
         </header>
 
-        <div class="bg-white p-4 md:p-6 rounded-xl shadow-2xl flex flex-col">
+        <!-- Main Chat Box: Floating Panel Effect -->
+        <div class="bg-white dark:bg-gray-900 p-4 md:p-6 rounded-2xl shadow-2xl dark:shadow-violet-500/20 flex flex-col transition-colors border border-gray-200 dark:border-gray-800">
             <!-- Chat History Display -->
-            <div id="chat-history" class="chat-container overflow-y-auto mb-4 p-4 border border-gray-200 rounded-lg flex flex-col space-y-4">
+            <div id="chat-history" class="chat-container overflow-y-auto mb-4 p-4 md:p-6 border border-gray-300 dark:border-gray-700 rounded-xl flex flex-col space-y-4 bg-gray-50 dark:bg-gray-950">
                 <div class="model-bubble p-3 shadow-md">
-                    Hello! I'm an AI assistant. How can I help you today? (Try clicking the map pin button to share your location!)
+                    <span id="initial-message">Connecting to database and authenticating...</span>
                 </div>
                 
                 <!-- Loading Indicator -->
@@ -71,69 +116,289 @@
                 
                 <!-- Location Button -->
                 <button id="location-btn" 
-                        class="px-3 bg-gray-400 text-white font-semibold rounded-lg hover:bg-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 transition-transform transform hover:scale-[1.01] flex items-center justify-center"
+                        class="px-3 bg-gray-500 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all shadow-md flex items-center justify-center hover:bg-gray-600"
                         onclick="getLocation()">
                     <!-- Map Pin Icon -->
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </button>
+                
+                <!-- Image Upload Button -->
+                <button id="image-upload-btn" 
+                        class="px-3 bg-violet-600 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-violet-500 transition-all shadow-md flex items-center justify-center hover:bg-violet-700"
+                        onclick="document.getElementById('image-input').click()">
+                    <!-- Camera Icon -->
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.414 5h3.172a2 2 0 011.664.89l.812 1.22a2 2 0 001.664.89H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+                
+                <!-- Hidden File Input -->
+                <input type="file" id="image-input" accept="image/*" class="hidden" onchange="previewImage(event)">
 
-                <input type="text" id="user-input" placeholder="Type your message here..."
-                       class="flex-grow p-3 border-2 border-indigo-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+
+                <input type="text" id="user-input" placeholder="Initiate conversation..."
+                       class="flex-grow p-4 border-2 border-violet-400 dark:border-cyan-500 rounded-xl focus:ring-violet-500 focus:border-violet-500 dark:bg-gray-800 dark:text-gray-100 transition-colors placeholder-gray-500 dark:placeholder-gray-400"
                        onkeypress="if(event.key === 'Enter') sendMessage()">
                 
+                <!-- Send Button: Neon Violet Accent -->
                 <button id="send-btn" 
-                        class="px-6 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition-transform transform hover:scale-[1.01] flex items-center justify-center"
+                        class="px-6 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-500 focus:ring-opacity-70 transition-all shadow-lg dark:shadow-violet-500/50 flex items-center justify-center"
                         onclick="sendMessage()">
-                    <svg id="button-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <svg id="button-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </button>
             </div>
+            
+            <!-- Image Preview Area -->
+            <div id="image-preview-area" class="mt-3 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg hidden">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Image attached (will be sent with next message):</p>
+                <img id="image-preview" class="max-h-40 rounded-lg object-contain mb-2" src="" alt="Image Preview">
+                <button onclick="clearImage()" class="text-sm text-red-500 hover:text-red-600">Remove Image</button>
+            </div>
+
 
             <!-- Custom Modal for Errors -->
             <div id="error-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
-                <div class="bg-white rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl">
-                    <h3 class="text-xl font-bold text-red-600 mb-3">Error</h3>
-                    <p id="error-message" class="text-gray-700 mb-4">An unknown error occurred.</p>
-                    <button class="w-full py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700" onclick="document.getElementById('error-modal').classList.add('hidden')">Close</button>
+                <div class="bg-white dark:bg-gray-700 rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl dark:shadow-red-600/50">
+                    <h3 class="text-xl font-bold text-red-600 mb-3 dark:text-red-400">Error: System Alert</h3>
+                    <p id="error-message" class="text-gray-700 mb-4 dark:text-gray-200">An unknown error occurred.</p>
+                    <button class="w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700" onclick="document.getElementById('error-modal').classList.add('hidden')">Acknowledge</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        // --- Firebase Imports ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
         // --- API Key Comment ---
-        // IMPORTANT: The 'apiKey' is left as an empty string. 
-        // In the Canvas environment where this code runs, the API key is automatically 
-        // and securely provided at runtime when the string is empty. 
-        // DO NOT paste your personal API key here; leave it as-is.
         const apiKey = "AIzaSyDmzDzuEiSMd3ZR9YT_f1T2EPz24mgbw5g"; 
-        // --- End API Key Comment ---
+
+        // --- Firebase/Canvas Configuration (Required for environment) ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // --- Global State ---
         let userLocation = null; // Stores {latitude: N, longitude: E}
-
-        // --- Firebase/Canvas Configuration (Required for environment) ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-
+        let uploadedImage = null; // Stores {data: base64, mimeType: string}
+        let db = null;
+        let auth = null;
+        let userId = null;
+        let isAuthReady = false;
+        
         // --- DOM Elements ---
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
-        const locationBtn = document.getElementById('location-btn'); // New element reference
+        const locationBtn = document.getElementById('location-btn'); 
         const chatHistoryDiv = document.getElementById('chat-history');
         const loadingIndicator = document.getElementById('loading-indicator');
         const errorModal = document.getElementById('error-modal');
         const errorMessage = document.getElementById('error-message');
+        const userInfoSpan = document.getElementById('user-info');
+        const initialMessageSpan = document.getElementById('initial-message');
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+        const imageInput = document.getElementById('image-input');
+        const imagePreview = document.getElementById('image-preview');
+        const imagePreviewArea = document.getElementById('image-preview-area');
+        const newChatBtn = document.getElementById('new-chat-btn');
 
-        // --- Chat State (Memory) ---
-        const chatHistory = [
-            { role: "model", parts: [{ text: "Hello! I'm an AI assistant. How can I help you today?" }] }
-        ];
+        // --- Chat State (Memory - This is now loaded from Firestore) ---
+        let chatHistory = []; 
 
         // --- API Constants ---
         const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
+        const SYSTEM_PROMPT = "You are a friendly, concise, and helpful conversational assistant. Maintain context and memory throughout the conversation. For any query requiring current or real-time information (like weather, news, or recent events), you must use your search tool. Your persona is a high-tech AI named AyazAI.";
 
-        // System instructions guide the model's persona and rules
-        const SYSTEM_PROMPT = "You are a friendly, concise, and helpful conversational assistant. Maintain context and memory throughout the conversation. For any query requiring current or real-time information (like weather, news, or recent events), you must use your search tool.";
+        // --- Firebase Initialization and Auth ---
+
+        /**
+         * Initializes Firebase and authenticates the user.
+         */
+        async function initFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        // Display only the first 8 characters of the userId for a clean UI, but log the full ID
+                        userInfoSpan.textContent = `UID: ${userId.substring(0, 8)}...`;
+                        console.log(`Authenticated User ID: ${userId}`);
+                        isAuthReady = true;
+                        
+                        // Start listening to the chat history
+                        listenToChatHistory(); 
+                        initialMessageSpan.textContent = "Welcome back, AyazAI systems online. Loading history...";
+                    } else {
+                        // Sign in using the custom token or anonymously
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                displayError(`Failed to initialize application: ${error.message}`);
+            }
+        }
+        
+        /**
+         * Sets up the real-time listener for the chat history from Firestore.
+         */
+        function listenToChatHistory() {
+            if (!db || !userId) return;
+
+            // Use the standard private path for chat history
+            const chatCollectionPath = `/artifacts/${appId}/users/${userId}/chats`;
+            const chatsRef = collection(db, chatCollectionPath);
+            
+            // Query to fetch messages ordered by timestamp
+            const q = query(chatsRef, orderBy('timestamp', 'asc')); 
+
+            onSnapshot(q, (snapshot) => {
+                chatHistory = []; // Reset local history
+                chatHistoryDiv.innerHTML = ''; // Clear chat display
+
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    const role = data.role;
+                    const text = data.text;
+                    const image = data.image; // Check for image data
+
+                    chatHistory.push({ role, parts: [{ text }] });
+
+                    // Handle image if present
+                    if (image && image.data && image.mimeType) {
+                        chatHistory[chatHistory.length - 1].parts.unshift({
+                            inlineData: {
+                                data: image.data,
+                                mimeType: image.mimeType
+                            }
+                        });
+                        displayMessage(text, role, `data:${image.mimeType};base64,${image.data}`);
+                    } else {
+                        displayMessage(text, role);
+                    }
+                });
+
+                // Control initial message display
+                const initialMsgContainer = initialMessageSpan.parentElement;
+                if (chatHistory.length > 0) {
+                    initialMsgContainer.style.display = 'none';
+                } else {
+                    initialMsgContainer.style.display = 'block';
+                    initialMessageSpan.textContent = "Hello! I'm AyazAI, your personal conversational engine. How can I assist you today?";
+                }
+
+                chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+            }, (error) => {
+                console.error("Error listening to chat history:", error);
+                displayError(`Error loading history: ${error.message}`);
+            });
+        }
+
+        /**
+         * Saves a message to the Firestore database.
+         * @param {string} role - The role ('user' or 'model').
+         * @param {string} text - The message content.
+         * @param {object | null} image - Optional image object {data: base64, mimeType: string}.
+         */
+        async function saveMessage(role, text, image = null) {
+            if (!db || !userId) return;
+
+            const chatCollectionPath = `/artifacts/${appId}/users/${userId}/chats`;
+            const data = {
+                role,
+                text,
+                timestamp: serverTimestamp(),
+                userId: userId,
+            };
+            if (image) {
+                data.image = image;
+            }
+
+            try {
+                // saveMessage does NOT trigger display, the onSnapshot listener does.
+                await addDoc(collection(db, chatCollectionPath), data);
+            } catch (error) {
+                console.error("Error saving message:", error);
+                displayError(`Failed to save message: ${error.message}`);
+            }
+        }
+
+        /**
+         * Clears all chat history documents for the current user.
+         */
+        async function clearHistory() {
+            if (!db || !userId) return;
+            
+            if (!confirm('Are you sure you want to start a new chat? This will permanently delete ALL messages in your history!')) {
+                return;
+            }
+
+            try {
+                newChatBtn.disabled = true;
+                const chatCollectionPath = `/artifacts/${appId}/users/${userId}/chats`;
+                const q = query(collection(db, chatCollectionPath));
+                
+                // Get all documents and delete them one by one
+                const snapshot = await getDocs(q);
+                const deletePromises = [];
+                snapshot.forEach((doc) => {
+                    deletePromises.push(deleteDoc(doc.ref));
+                });
+
+                await Promise.all(deletePromises);
+                
+                // onSnapshot will handle clearing the UI
+                console.log("Chat history cleared successfully.");
+
+            } catch (error) {
+                console.error("Error clearing chat history:", error);
+                displayError(`Failed to clear history: ${error.message}`);
+            } finally {
+                newChatBtn.disabled = false;
+            }
+        }
+
+
+        // --- Theme Management ---
+
+        /**
+         * Applies the selected theme and saves it to localStorage.
+         * @param {string} theme - 'light' or 'dark'.
+         */
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        // Load theme preference on startup
+        const preferredTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        applyTheme(preferredTheme);
+
+        themeToggleBtn.addEventListener('click', () => {
+            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            applyTheme(newTheme);
+        });
+        
+        // --- Utility Functions ---
 
         /**
          * Generic error handler to display a message in a custom modal.
@@ -176,29 +441,85 @@
          * Renders a new message bubble in the chat history.
          * @param {string} text - The message content.
          * @param {string} role - The role ('user' or 'model').
+         * @param {string | null} imageUrl - Optional image URL to display above the text.
          */
-        function displayMessage(text, role) {
+        function displayMessage(text, role, imageUrl = null) {
             const messageWrapper = document.createElement('div');
-            messageWrapper.className = `p-3 shadow-md ${role === 'user' ? 'user-bubble' : 'model-bubble'}`;
-            messageWrapper.textContent = text; 
-            chatHistoryDiv.appendChild(messageWrapper);
+            messageWrapper.className = `flex flex-col p-3 shadow-md ${role}-bubble`;
             
-            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+            if (imageUrl) {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.className = 'max-h-40 rounded-lg object-contain mb-2 self-center';
+                messageWrapper.appendChild(img);
+            }
+
+            const textSpan = document.createElement('span');
+            textSpan.textContent = text;
+            messageWrapper.appendChild(textSpan);
+            
+            chatHistoryDiv.appendChild(messageWrapper);
+        }
+        
+        // --- Image Handling ---
+
+        /**
+         * Clears the image preview and the global state.
+         */
+        window.clearImage = function() {
+            uploadedImage = null;
+            imageInput.value = '';
+            imagePreview.src = '';
+            imagePreviewArea.classList.add('hidden');
+            userInput.focus();
         }
 
         /**
-         * Function to request user's current location via browser Geolocation API.
+         * Reads the uploaded file and updates the preview/global state.
+         * @param {Event} event - The file input change event.
          */
+        window.previewImage = function(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                clearImage();
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64String = e.target.result.split(',')[1];
+                const mimeType = file.type;
+                
+                // Set global state
+                uploadedImage = {
+                    data: base64String,
+                    mimeType: mimeType
+                };
+
+                // Update preview
+                imagePreview.src = e.target.result;
+                imagePreviewArea.classList.remove('hidden');
+                userInput.focus();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- Geolocation Functionality ---
         function getLocation() {
             if (!navigator.geolocation) {
                 displayError("Geolocation is not supported by your browser.");
                 return;
             }
 
+            // Custom UI behavior for location request (simplified to use only console/text status for non-blocking UI)
+            const locationStatus = document.createElement('div');
+            locationStatus.textContent = "Requesting location coordinates...";
+            locationStatus.className = "text-center text-sm text-gray-500 dark:text-gray-400 my-2";
+            chatHistoryDiv.appendChild(locationStatus);
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+            
             locationBtn.disabled = true;
             locationBtn.classList.add('opacity-50');
-
-            displayMessage("Requesting your location...", 'model');
 
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -206,62 +527,88 @@
                         latitude: position.coords.latitude.toFixed(4),
                         longitude: position.coords.longitude.toFixed(4)
                     };
-                    displayMessage(`Location set! (Lat: ${userLocation.latitude}, Lon: ${userLocation.longitude}). Your next queries will be location-aware.`, 'model');
+                    locationStatus.textContent = `Location Status: Connected (Lat: ${userLocation.latitude}, Lon: ${userLocation.longitude}).`;
                     
                     locationBtn.disabled = false;
-                    locationBtn.classList.remove('opacity-50', 'bg-gray-400', 'hover:bg-gray-500');
-                    locationBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+                    // Change to a neon-like cyan color on success
+                    locationBtn.classList.remove('opacity-50', 'bg-gray-500', 'hover:bg-gray-600');
+                    locationBtn.classList.add('bg-cyan-500', 'hover:bg-cyan-600', 'shadow-cyan-500/50');
                 },
                 (error) => {
                     locationBtn.disabled = false;
-                    locationBtn.classList.remove('opacity-50');
-                    locationBtn.classList.add('bg-gray-400', 'hover:bg-gray-500');
-                    locationBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                    locationBtn.classList.remove('opacity-50', 'bg-cyan-500', 'hover:bg-cyan-600', 'shadow-cyan-500/50');
+                    locationBtn.classList.add('bg-gray-500', 'hover:bg-gray-600');
 
-                    let errorMsg = "Could not get location.";
+                    let errorMsg = "Could not retrieve location data.";
                     if (error.code === error.PERMISSION_DENIED) {
-                        errorMsg = "Location access denied. Please grant permission in your browser settings.";
-                    } else if (error.code === error.POSITION_UNAVAILABLE) {
-                        errorMsg = "Location information is unavailable.";
-                    } else if (error.code === error.TIMEOUT) {
-                        errorMsg = "The request to get user location timed out.";
+                        errorMsg = "Access Denied. Please enable location permissions in your browser.";
                     }
-                    displayError(errorMsg);
-                    displayMessage(`Location request failed: ${errorMsg}`, 'model');
-                    userLocation = null; // Clear any previous location
+                    locationStatus.textContent = `Location Status: Error (${errorMsg})`;
+                    userLocation = null; 
                 }
             );
         }
 
+        // --- Main Send Message Function ---
+
         /**
          * Main function to send a message and get an AI response.
          */
-        async function sendMessage() {
+        window.sendMessage = async function() {
+            if (!isAuthReady) {
+                displayError("System not authorized. Please wait for connection or refresh.");
+                return;
+            }
+
             const userQuery = userInput.value.trim();
-            if (!userQuery) return;
+            // Allow sending if there is text OR an image uploaded
+            if (!userQuery && !uploadedImage) return;
 
             // --- UI State: User Message & Loading ---
-            // The message displayed to the user is clean, without coordinates.
-            displayMessage(userQuery, 'user');
             userInput.value = ''; // Clear input field
             sendBtn.disabled = true;
             sendBtn.classList.add('opacity-70', 'cursor-not-allowed');
             loadingIndicator.classList.remove('hidden');
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; // Scroll to bottom before sending
 
-            // 1. Create the contextual prompt for the AI
-            let promptWithLocation = userQuery;
+            // 1. Create the parts array for the API payload
+            let parts = [];
+            
+            // Add image part if present
+            if (uploadedImage) {
+                parts.push({
+                    inlineData: {
+                        data: uploadedImage.data,
+                        mimeType: uploadedImage.mimeType
+                    }
+                });
+            }
+            
+            // Add text part (even if empty, for image-only queries)
+            let promptWithLocation = userQuery || "Analyze the image.";
             if (userLocation) {
                 // Prepend location context to the user's message for the model's benefit
-                promptWithLocation = `(User Location: Lat ${userLocation.latitude}, Lon ${userLocation.longitude}) ${userQuery}`;
+                promptWithLocation = `(User Location: Lat ${userLocation.latitude}, Lon ${userLocation.longitude}) ${promptWithLocation}`;
             }
+            parts.push({ text: promptWithLocation });
 
-            // 2. Add the contextual message (promptWithLocation) to history
-            chatHistory.push({ role: "user", parts: [{ text: promptWithLocation }] });
+
+            // 2. Save the user's message to Firestore (this triggers display via onSnapshot)
+            await saveMessage('user', userQuery || "Image attached.", uploadedImage);
+            
+            // Clear image immediately after saving for the user session
+            clearImage();
+
+            // 3. Prepare chat history for API (context)
+            // The history is always guaranteed to be up-to-date due to the onSnapshot listener
+            // Add the new user message to the context for the AI call
+            const contentsForApi = [...chatHistory, { role: 'user', parts: parts }];
+            
+            // Limit context to the last 10 parts for speed
+            const limitedContentsForApi = contentsForApi.slice(-10);
 
             const payload = {
-                // Send the ENTIRE chat history for memory
-                contents: chatHistory, 
-                // Enable grounding for real-time data
+                contents: limitedContentsForApi, 
                 tools: [{ "google_search": {} }], 
                 systemInstruction: {
                     parts: [{ text: SYSTEM_PROMPT }]
@@ -284,20 +631,12 @@
                     throw new Error("Received an empty or malformed response from the model.");
                 }
                 
-                // 3. Add model response to history
-                chatHistory.push({ role: "model", parts: [{ text: modelResponseText }] });
-                
-                // --- UI State: Model Message & Ready ---
-                displayMessage(modelResponseText, 'model');
+                // 4. Save the model response to Firestore (this triggers display via onSnapshot)
+                await saveMessage('model', modelResponseText);
 
             } catch (error) {
                 console.error("API Error:", error);
-                displayError(`Chat failed. Error: ${error.message}`);
-                
-                // IMPORTANT: If the API fails, remove the last user message from history
-                if (chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === 'user') {
-                    chatHistory.pop();
-                }
+                displayError(`API connection error: ${error.message}. Please check console.`);
             } finally {
                 loadingIndicator.classList.add('hidden');
                 sendBtn.disabled = false;
@@ -305,6 +644,9 @@
                 userInput.focus(); // Keep focus on the input box
             }
         }
+        
+        // --- Bootstrap ---
+        initFirebase();
     </script>
 </body>
 </html>
