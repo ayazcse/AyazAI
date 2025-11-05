@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gen AI Chat with Memory</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom CSS for Inter font and chat aesthetics */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+        }
+        .chat-container {
+            height: 70vh; /* Set a fixed height for the chat area */
+            max-height: 600px;
+        }
+        .user-bubble {
+            background-color: #4f46e5; /* Indigo-600 */
+            color: white;
+            border-radius: 1rem 1rem 0.25rem 1rem;
+            max-width: 80%;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .model-bubble {
+            background-color: #e5e7eb; /* Gray-200 */
+            color: #1f2937; /* Gray-800 */
+            border-radius: 1rem 1rem 1rem 0.25rem;
+            max-width: 80%;
+            align-self: flex-start;
+        }
+        .loader {
+            border-top-color: #4f46e5;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center">
+
+    <div class="container mx-auto">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-extrabold text-indigo-700">Gen AI Chat with Memory (Location-Aware)</h1>
+            <p class="mt-1 text-lg text-gray-600">Contextual conversation using the Gemini API.</p>
+        </header>
+
+        <div class="bg-white p-4 md:p-6 rounded-xl shadow-2xl flex flex-col">
+            <!-- Chat History Display -->
+            <div id="chat-history" class="chat-container overflow-y-auto mb-4 p-4 border border-gray-200 rounded-lg flex flex-col space-y-4">
+                <div class="model-bubble p-3 shadow-md">
+                    Hello! I'm an AI assistant. How can I help you today? (Try clicking the map pin button to share your location!)
+                </div>
+                
+                <!-- Loading Indicator -->
+                <div id="loading-indicator" class="hidden my-4 self-center">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8 mx-auto"></div>
+                </div>
+            </div>
+
+            <!-- Chat Input Section -->
+            <div class="flex space-x-3">
+                
+                <!-- Location Button -->
+                <button id="location-btn" 
+                        class="px-3 bg-gray-400 text-white font-semibold rounded-lg hover:bg-gray-500 focus:outline-none focus:ring-4 focus:ring-gray-300 focus:ring-opacity-50 transition-transform transform hover:scale-[1.01] flex items-center justify-center"
+                        onclick="getLocation()">
+                    <!-- Map Pin Icon -->
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+
+                <input type="text" id="user-input" placeholder="Type your message here..."
+                       class="flex-grow p-3 border-2 border-indigo-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                       onkeypress="if(event.key === 'Enter') sendMessage()">
+                
+                <button id="send-btn" 
+                        class="px-6 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition-transform transform hover:scale-[1.01] flex items-center justify-center"
+                        onclick="sendMessage()">
+                    <svg id="button-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </button>
+            </div>
+
+            <!-- Custom Modal for Errors -->
+            <div id="error-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl">
+                    <h3 class="text-xl font-bold text-red-600 mb-3">Error</h3>
+                    <p id="error-message" class="text-gray-700 mb-4">An unknown error occurred.</p>
+                    <button class="w-full py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700" onclick="document.getElementById('error-modal').classList.add('hidden')">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- API Key Comment ---
+        // IMPORTANT: The 'apiKey' is left as an empty string. 
+        // In the Canvas environment where this code runs, the API key is automatically 
+        // and securely provided at runtime when the string is empty. 
+        // DO NOT paste your personal API key here; leave it as-is.
+        const apiKey = "AIzaSyDmzDzuEiSMd3ZR9YT_f1T2EPz24mgbw5g"; 
+        // --- End API Key Comment ---
+
+        // --- Global State ---
+        let userLocation = null; // Stores {latitude: N, longitude: E}
+
+        // --- Firebase/Canvas Configuration (Required for environment) ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+        // --- DOM Elements ---
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const locationBtn = document.getElementById('location-btn'); // New element reference
+        const chatHistoryDiv = document.getElementById('chat-history');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const errorModal = document.getElementById('error-modal');
+        const errorMessage = document.getElementById('error-message');
+
+        // --- Chat State (Memory) ---
+        const chatHistory = [
+            { role: "model", parts: [{ text: "Hello! I'm an AI assistant. How can I help you today?" }] }
+        ];
+
+        // --- API Constants ---
+        const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
+
+        // System instructions guide the model's persona and rules
+        const SYSTEM_PROMPT = "You are a friendly, concise, and helpful conversational assistant. Maintain context and memory throughout the conversation. For any query requiring current or real-time information (like weather, news, or recent events), you must use your search tool.";
+
+        /**
+         * Generic error handler to display a message in a custom modal.
+         * @param {string} message - The error message to display.
+         */
+        function displayError(message) {
+            errorMessage.textContent = message;
+            errorModal.classList.remove('hidden');
+            loadingIndicator.classList.add('hidden');
+        }
+
+        /**
+         * Helper function for fetching with exponential backoff retry.
+         */
+        async function fetchWithRetry(url, options, maxRetries = 3, delay = 1000) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status === 429 && i < maxRetries - 1) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2; 
+                        continue;
+                    }
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    if (i === maxRetries - 1) {
+                        throw error;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2; 
+                }
+            }
+        }
+        
+        /**
+         * Renders a new message bubble in the chat history.
+         * @param {string} text - The message content.
+         * @param {string} role - The role ('user' or 'model').
+         */
+        function displayMessage(text, role) {
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `p-3 shadow-md ${role === 'user' ? 'user-bubble' : 'model-bubble'}`;
+            messageWrapper.textContent = text; 
+            chatHistoryDiv.appendChild(messageWrapper);
+            
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+        }
+
+        /**
+         * Function to request user's current location via browser Geolocation API.
+         */
+        function getLocation() {
+            if (!navigator.geolocation) {
+                displayError("Geolocation is not supported by your browser.");
+                return;
+            }
+
+            locationBtn.disabled = true;
+            locationBtn.classList.add('opacity-50');
+
+            displayMessage("Requesting your location...", 'model');
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLocation = {
+                        latitude: position.coords.latitude.toFixed(4),
+                        longitude: position.coords.longitude.toFixed(4)
+                    };
+                    displayMessage(`Location set! (Lat: ${userLocation.latitude}, Lon: ${userLocation.longitude}). Your next queries will be location-aware.`, 'model');
+                    
+                    locationBtn.disabled = false;
+                    locationBtn.classList.remove('opacity-50', 'bg-gray-400', 'hover:bg-gray-500');
+                    locationBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+                },
+                (error) => {
+                    locationBtn.disabled = false;
+                    locationBtn.classList.remove('opacity-50');
+                    locationBtn.classList.add('bg-gray-400', 'hover:bg-gray-500');
+                    locationBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+
+                    let errorMsg = "Could not get location.";
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errorMsg = "Location access denied. Please grant permission in your browser settings.";
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        errorMsg = "Location information is unavailable.";
+                    } else if (error.code === error.TIMEOUT) {
+                        errorMsg = "The request to get user location timed out.";
+                    }
+                    displayError(errorMsg);
+                    displayMessage(`Location request failed: ${errorMsg}`, 'model');
+                    userLocation = null; // Clear any previous location
+                }
+            );
+        }
+
+        /**
+         * Main function to send a message and get an AI response.
+         */
+        async function sendMessage() {
+            const userQuery = userInput.value.trim();
+            if (!userQuery) return;
+
+            // --- UI State: User Message & Loading ---
+            // The message displayed to the user is clean, without coordinates.
+            displayMessage(userQuery, 'user');
+            userInput.value = ''; // Clear input field
+            sendBtn.disabled = true;
+            sendBtn.classList.add('opacity-70', 'cursor-not-allowed');
+            loadingIndicator.classList.remove('hidden');
+
+            // 1. Create the contextual prompt for the AI
+            let promptWithLocation = userQuery;
+            if (userLocation) {
+                // Prepend location context to the user's message for the model's benefit
+                promptWithLocation = `(User Location: Lat ${userLocation.latitude}, Lon ${userLocation.longitude}) ${userQuery}`;
+            }
+
+            // 2. Add the contextual message (promptWithLocation) to history
+            chatHistory.push({ role: "user", parts: [{ text: promptWithLocation }] });
+
+            const payload = {
+                // Send the ENTIRE chat history for memory
+                contents: chatHistory, 
+                // Enable grounding for real-time data
+                tools: [{ "google_search": {} }], 
+                systemInstruction: {
+                    parts: [{ text: SYSTEM_PROMPT }]
+                },
+            };
+
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            };
+
+            try {
+                const response = await fetchWithRetry(API_URL, options);
+                const result = await response.json();
+                
+                const modelResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (!modelResponseText) {
+                    throw new Error("Received an empty or malformed response from the model.");
+                }
+                
+                // 3. Add model response to history
+                chatHistory.push({ role: "model", parts: [{ text: modelResponseText }] });
+                
+                // --- UI State: Model Message & Ready ---
+                displayMessage(modelResponseText, 'model');
+
+            } catch (error) {
+                console.error("API Error:", error);
+                displayError(`Chat failed. Error: ${error.message}`);
+                
+                // IMPORTANT: If the API fails, remove the last user message from history
+                if (chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === 'user') {
+                    chatHistory.pop();
+                }
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                sendBtn.disabled = false;
+                sendBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                userInput.focus(); // Keep focus on the input box
+            }
+        }
+    </script>
+</body>
+</html>
