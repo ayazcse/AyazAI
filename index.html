@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,44 +10,120 @@
         /* Custom CSS for Inter font and chat aesthetics */
         body {
             font-family: 'Inter', sans-serif;
-            /* Transition kept for smooth element changes */
-            transition: background-color 0.4s;
+            transition: background-color 0.4s, color 0.4s;
         }
+
+        /* --- DARK THEME STYLES (Default) --- */
+        [data-theme="dark"] body {
+            background-color: #0d1117; /* Very Dark Blue-Gray */
+            color: #d1d5db;
+        }
+        [data-theme="dark"] .app-bg {
+            background-color: #161b22;
+            border-color: #30363d;
+            box-shadow: 0 10px 15px -3px rgba(126, 34, 206, 0.2), 0 4px 6px -2px rgba(126, 34, 206, 0.1);
+        }
+        [data-theme="dark"] .chat-history-bg {
+            background-color: #0d1117;
+            border-color: #30363d;
+        }
+        [data-theme="dark"] #user-input {
+            background-color: #161b22;
+            color: #d1d5db;
+            border-color: #4a5568;
+        }
+        [data-theme="dark"] .model-bubble {
+            background-color: #1f2937; 
+            color: #d1d5db;
+            box-shadow: 0 0 5px rgba(126, 34, 206, 0.3);
+        }
+        [data-theme="dark"] .user-bubble-wrapper {
+             /* Wrapper for right alignment */
+            align-self: flex-end; 
+        }
+        [data-theme="dark"] .user-bubble {
+            background-color: #22d3ee; /* Cyan-400 */
+            color: #111827;
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.5); 
+        }
+        [data-theme="dark"] .loader {
+            border-top-color: #a78bfa; 
+        }
+        [data-theme="dark"] .location-active {
+             /* Cyan glow in dark mode */
+            animation: pulse-border-dark 1.5s infinite;
+        }
+        @keyframes pulse-border-dark {
+            0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 211, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+        }
+
+
+        /* --- LIGHT THEME STYLES --- */
+        [data-theme="light"] body {
+            background-color: #f7fafc; /* Near-White */
+            color: #1a202c;
+        }
+        [data-theme="light"] .app-bg {
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        [data-theme="light"] .chat-history-bg {
+            background-color: #f7fafc;
+            border-color: #e2e8f0;
+        }
+        [data-theme="light"] #user-input {
+            background-color: #ffffff;
+            color: #1a202c;
+            border-color: #cbd5e0;
+        }
+        [data-theme="light"] .model-bubble {
+            background-color: #e2e8f0; /* Light Gray */
+            color: #1a202c;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        [data-theme="light"] .user-bubble-wrapper {
+            /* Wrapper for right alignment */
+            align-self: flex-end; 
+        }
+        [data-theme="light"] .user-bubble {
+            background-color: #90cdf4; /* Light Blue */
+            color: #1a202c;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+        }
+        [data-theme="light"] .location-active {
+            /* Blue glow in light mode */
+            animation: pulse-border-light 1.5s infinite;
+        }
+        @keyframes pulse-border-light {
+            0% { box-shadow: 0 0 0 0 rgba(144, 205, 244, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(144, 205, 244, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(144, 205, 244, 0); }
+        }
+
+
+        /* Global Styles (not theme specific) */
         .container {
             max-width: 1000px;
         }
-        
-        /* Shared Bubble Styling */
         .user-bubble, .model-bubble {
             padding: 0.75rem 1.25rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            word-wrap: break-word; /* Ensure text wraps */
+            word-wrap: break-word;
             overflow-wrap: break-word;
-            max-width: 90%; /* Max width for bubbles */
-            white-space: pre-wrap; /* Preserve whitespace and line breaks for code/formatting */
+            max-width: 90%; 
+            white-space: pre-wrap;
         }
-
-        /* Enforced Dark Mode Bubbles - High Contrast & Neon */
-        .user-bubble {
-            background-color: #22d3ee; /* Cyan-400 */
-            color: #111827; /* Dark text for contrast */
-            border-radius: 1rem 1rem 0.25rem 1rem;
-            margin-left: auto;
-            /* Neon effect on background for a future vibe */
-            box-shadow: 0 0 10px rgba(34, 211, 238, 0.5); 
+        .user-bubble-container {
+            /* Ensures user messages (including image) align right */
+            align-self: flex-end;
         }
-        .model-bubble {
-            background-color: #1f2937; /* Gray-800 */
-            color: #d1d5db; /* Gray-300 */
-            border-radius: 1rem 1rem 1rem 0.25rem;
-            margin-right: auto;
-            /* Subtle glow */
-            box-shadow: 0 0 5px rgba(126, 34, 206, 0.3);
+        .model-bubble-container {
+            /* Ensures model messages (including image) align left (default) */
+            align-self: flex-start;
         }
-
-        /* Loader with a neon touch */
         .loader {
-            border-top-color: #a78bfa; /* Violet-400 */
             animation: spin 1s ease-in-out infinite;
         }
         @keyframes spin {
@@ -56,15 +132,24 @@
         }
     </style>
 </head>
-<!-- Enforced Dark Mode Background -->
-<body class="p-4 md:p-8 flex flex-col min-h-screen bg-gray-950 transition-colors">
+<!-- Initial theme is set to dark (controlled by JS) -->
+<body class="p-4 md:p-8 flex flex-col h-screen overflow-hidden transition-colors">
 
-    <div class="container mx-auto w-full flex flex-col flex-grow">
+    <div class="container mx-auto w-full flex flex-col flex-grow h-full">
         <header class="mb-6 flex justify-between items-center flex-shrink-0">
-            <!-- Action Group: Only New Chat remains -->
+            <!-- Action Group -->
             <div class="flex space-x-2">
-                <!-- Theme Toggle Button REMOVED -->
                 
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle-btn" 
+                        class="p-3 rounded-full bg-gray-500 text-white transition-colors shadow-xl hover:bg-gray-600" 
+                        onclick="toggleTheme()">
+                    <!-- Sun/Moon Icon (Will be swapped by JS) -->
+                    <svg id="theme-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3a9 9 0 109 9c0-.46-.04-.91-.1-1.35a.25.25 0 00-.33-.27.25.25 0 00-.27.33A7.5 7.5 0 0112 19.5a7.5 7.5 0 117.5-7.5c0 .46-.04.91-.1 1.35a.25.25 0 00-.33.27.25.25 0 00-.27-.33A7.5 7.5 0 0112 4.5a7.5 7.5 0 017.5 7.5 7.5 7.5 0 01-7.5 7.5.75.75 0 00.75.75c3.55 0 6.78-1.55 9-4.04a.75.75 0 00-1.28-.82c-2.02 2.22-4.9 3.56-8.22 3.56a9 9 0 01-9-9 9 9 0 0115-6.75A9 9 0 0012 3z"></path>
+                    </svg>
+                </button>
+
                 <!-- New Chat Button (Clear History) - Calls confirmation modal -->
                 <button id="new-chat-btn" 
                         class="p-3 rounded-full bg-red-700 text-white transition-colors shadow-xl hover:shadow-red-500/50 hover:bg-red-800" 
@@ -78,17 +163,25 @@
             <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-600 tracking-wider text-center">AyazAI</h1>
             
             <!-- Status Badge: Adjusted text color for dark mode -->
-            <span id="system-status" class="text-xs text-gray-400 p-2 border border-gray-700 rounded-lg hidden md:block flex-shrink-0">Status: Ready</span>
+            <span id="system-status" class="text-xs p-2 border rounded-lg hidden md:block flex-shrink-0">Status: Ready</span>
 
         </header>
+        
+        <!-- Location Status Indicator -->
+        <div id="location-status-bar" class="flex justify-end mb-3 flex-shrink-0">
+            <!-- Dynamic styling handled by JS -->
+            <span id="location-status" class="text-xs p-2 rounded-lg transition-all border">
+                Location: Off
+            </span>
+        </div>
 
-        <!-- Main Chat Box: Enforced Dark Mode styling -->
-        <div class="bg-gray-900 p-4 md:p-6 rounded-2xl shadow-2xl shadow-violet-500/20 flex flex-col transition-colors border border-gray-800 flex-grow overflow-hidden">
-            <!-- Chat History Display. Enforced Dark Mode styling -->
-            <div id="chat-history" class="flex-grow overflow-y-auto mb-4 p-4 md:p-6 border border-gray-700 rounded-xl flex flex-col space-y-4 bg-gray-950">
+        <!-- Main Chat Box: App-bg class handles theme background -->
+        <div class="app-bg p-4 md:p-6 rounded-2xl shadow-2xl flex flex-col transition-colors border flex-grow overflow-hidden">
+            <!-- Chat History Display. chat-history-bg class handles theme background -->
+            <div id="chat-history" class="flex-grow overflow-y-auto mb-4 p-4 md:p-6 border rounded-xl flex flex-col space-y-4 chat-history-bg">
                 <!-- Initial Welcome Message -->
-                <div id="initial-message-box" class="model-bubble p-3 shadow-md">
-                    <span id="initial-message">Hello! I'm AyazAI, a local conversational engine. How can I assist you today?</span>
+                <div id="initial-message-box" class="model-bubble p-3 shadow-md model-bubble-container">
+                    <span id="initial-message">Hello! I'm AyazAI, a local conversational engine. I can now speak my responses! How can I assist you today?</span>
                 </div>
                 
                 <!-- Loading Indicator -->
@@ -100,12 +193,12 @@
             <!-- Chat Input Section. Added flex-shrink-0 -->
             <div class="flex space-x-2 flex-shrink-0">
                 
-                <!-- Location Button (Reduced padding from px-3 to p-2 for space) -->
+                <!-- Location Button (Map Icon) -->
                 <button id="location-btn" 
-                        class="p-2 bg-gray-500 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all shadow-md flex items-center justify-center hover:bg-gray-600"
+                        class="p-2 bg-cyan-600 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-cyan-500 transition-all shadow-md flex items-center justify-center hover:bg-cyan-700" 
                         onclick="getLocation()">
-                    <!-- Map Pin Icon -->
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <!-- Map/Location Pin Icon -->
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243m.707-8.243a7 7 0 119.899 9.899L12 20.908l-5.303-5.303a7 7 0 019.899-9.899z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </button>
                 
                 <!-- Image Upload Button (Reduced padding from px-3 to p-2 for space) -->
@@ -121,7 +214,7 @@
 
 
                 <input type="text" id="user-input" placeholder="Initiate conversation..."
-                        class="flex-grow p-4 border-2 border-violet-400 border-cyan-500 rounded-xl focus:ring-violet-500 focus:border-violet-500 bg-gray-800 text-gray-100 transition-colors placeholder-gray-400 min-w-0"
+                        class="flex-grow p-4 border-2 rounded-xl focus:ring-violet-500 focus:border-violet-500 transition-colors placeholder-gray-400 min-w-0"
                         onkeypress="if(event.key === 'Enter') sendMessage()">
                 
                 <!-- Send Button: Reduced horizontal padding from px-6 to px-4 for space -->
@@ -136,7 +229,7 @@
             <div id="image-preview-area" class="mt-3 p-3 flex-shrink-0 bg-gray-800 rounded-lg hidden">
                 <p class="text-sm font-semibold text-gray-300 mb-2">Image attached (will be sent with next message):</p>
                 <img id="image-preview" class="max-h-40 rounded-lg object-contain mb-2" src="" alt="Image Preview">
-                <button onclick="clearImage()" class="text-sm text-red-500 hover:text-red-600">Remove Image</button>
+                <button onclick="clearImage()" class="text-sm text-red-500 hover:text-red-600" id="remove-image-btn">Remove Image</button>
             </div>
 
 
@@ -160,6 +253,16 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Location Permission Modal -->
+            <div id="permission-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
+                <div class="bg-gray-700 rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl shadow-cyan-600/50">
+                    <h3 class="text-xl font-bold text-cyan-400 mb-3">Location Permission Needed</h3>
+                    <p id="permission-message" class="text-gray-200 mb-4">It looks like location access was denied by your browser.</p>
+                    <p class="text-sm text-gray-300 mb-6">**To fix this:** You must go into your browser's site settings for this page and manually change the Location permission from **"Block"** to **"Allow"**, then try clicking the map button again.</p>
+                    <button class="w-full py-3 bg-cyan-600 text-white font-semibold rounded-lg hover:bg-cyan-700" onclick="document.getElementById('permission-modal').classList.add('hidden')">Got it</button>
+                </div>
+            </div>
 
         </div>
     </div>
@@ -169,14 +272,16 @@
         const apiKey = "AIzaSyDmzDzuEiSMd3ZR9YT_f1T2EPz24mgbw5g"; 
 
         // --- Global State ---
-        let userLocation = null; // Stores {latitude: N, longitude: E}
+        let userLocation = null; // Stores {lat: number, lon: number} if successfully fetched
         let uploadedImage = null; // Stores {data: base64, mimeType: string}
         let chatHistory = []; // Local memory for the session
         
         // --- DOM Elements ---
+        const body = document.body;
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
         const locationBtn = document.getElementById('location-btn'); 
+        const locationStatusSpan = document.getElementById('location-status'); 
         const chatHistoryDiv = document.getElementById('chat-history');
         const loadingIndicator = document.getElementById('loading-indicator');
         const errorModal = document.getElementById('error-modal');
@@ -185,17 +290,17 @@
         const systemStatusSpan = document.getElementById('system-status');
         const initialMessageBox = document.getElementById('initial-message-box');
         const initialMessageSpan = document.getElementById('initial-message');
-        // Theme-related elements removed
         const imageInput = document.getElementById('image-input');
         const imagePreview = document.getElementById('image-preview');
         const imagePreviewArea = document.getElementById('image-preview-area');
+        const themeIcon = document.getElementById('theme-icon');
+        const permissionModal = document.getElementById('permission-modal'); 
 
         // --- API Constants ---
         const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
-        const SYSTEM_PROMPT = "You are a friendly, concise, and helpful conversational assistant. Maintain context and memory throughout the conversation. For any query requiring current or real-time information (like weather, news, or recent events), you must use your search tool. Your persona is a high-tech AI named AyazAI. Since this application runs locally without a database, your memory only lasts for this session. Your responses must be in plain text and should not use markdown formatting like **bolding** or *italics* as the client UI handles formatting.";
-
-        // --- Theme Management Removed ---
+        const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
+        const SYSTEM_PROMPT = "You are a friendly, concise, and helpful conversational assistant. Maintain context and memory throughout the conversation. For any query requiring current or real-time information (like weather, news, or recent events), you must use your search tool. Your persona is a high-tech AI named AyazAI. Since this application runs locally without a database, your memory only lasts for this session. Your responses must be in plain text and should not use markdown formatting like **bolding** or *italics* as the client UI handles formatting. IMPORTANT: The user may include location data in their message: 'User Location: [LAT, LON]'. Use this if relevant for time, weather, or local recommendations.";
 
         
         // --- Utility Functions ---
@@ -246,64 +351,60 @@
          * @returns {string} The text with markdown symbols stripped.
          */
         function stripMarkdown(text) {
-            // Remove common bold/italics markers: **, *, _, and also code fences (```)
-            let cleanedText = text.replace(/```.*?```/gs, ''); // Remove fenced code blocks completely (safer than trying to format)
-            cleanedText = cleanedText.replace(/\*\*/g, ''); // Remove double asterisks (bold)
-            cleanedText = cleanedText.replace(/\*/g, '');  // Remove single asterisks (italics/emphasis)
-            cleanedText = cleanedText.replace(/_/g, '');  // Remove underscores (italics/emphasis)
+            let cleanedText = text.replace(/```.*?```/gs, ''); 
+            cleanedText = cleanedText.replace(/\*\*/g, ''); 
+            cleanedText = cleanedText.replace(/\*/g, '');  
+            cleanedText = cleanedText.replace(/_/g, '');  
             
             return cleanedText.trim();
         }
 
         /**
          * Renders a new message bubble in the chat history.
-         * @param {string} text - The message content.
-         * @param {string} role - The role ('user' or 'model').
-         * @param {string | null} imageUrl - Optional image URL to display above the text.
          */
         function displayMessage(text, role, imageUrl = null) {
-            // Hide initial welcome message box if we display a real message
             if (chatHistory.length > 0 && !initialMessageBox.classList.contains('hidden')) {
                 initialMessageBox.classList.add('hidden');
             }
+            
+            // Create a container to handle alignment (user=right, model=left)
+            const messageContainer = document.createElement('div');
+            messageContainer.className = role === 'user' ? 'user-bubble-container' : 'model-bubble-container';
+
 
             const messageWrapper = document.createElement('div');
-            // The role-bubble class is crucial for left/right alignment and styling
             messageWrapper.className = `${role}-bubble`;
+            // Ensure both user and model bubbles have rounded corners and left-aligned text for readability
+            messageWrapper.classList.add('rounded-xl', 'text-left'); 
             
             if (imageUrl) {
                 const img = document.createElement('img');
                 img.src = imageUrl;
-                img.className = 'max-h-40 rounded-lg object-contain mb-2 self-center';
+                img.className = 'max-h-40 rounded-lg object-contain mb-2';
                 messageWrapper.appendChild(img);
             }
 
             const textSpan = document.createElement('span');
-            textSpan.textContent = text; // textContent prevents XSS but markdown needs to be stripped first
+            textSpan.textContent = text; 
             messageWrapper.appendChild(textSpan);
             
-            chatHistoryDiv.appendChild(messageWrapper);
-            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; // Auto-scroll
+            messageContainer.appendChild(messageWrapper);
+            chatHistoryDiv.appendChild(messageContainer);
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; 
         }
         
         /**
          * Saves a message to the local chatHistory array and triggers display.
-         * @param {string} role - The role ('user' or 'model').
-         * @param {string} text - The message content (already cleaned if 'model').
-         * @param {object | null} image - Optional image object {data: base64, mimeType: string}.
          */
         async function saveMessage(role, text, image = null) {
-            // 1. Prepare message parts for local history (context for API)
             const parts = [{ text }];
             if (image) {
                 parts.unshift({ inlineData: { data: image.data, mimeType: image.mimeType } });
             }
             const message = { role, parts };
             
-            // 2. Push to local memory
             chatHistory.push(message);
 
-            // 3. Directly display the message
             const imageUrl = image ? `data:${image.mimeType};base64,${image.data}` : null;
             displayMessage(text, role, imageUrl);
         }
@@ -319,26 +420,63 @@
          * Clears all local chat history after confirmation.
          */
         window.performClearHistory = function() {
-            // Hide the modal
             confirmModal.classList.add('hidden');
             
-            chatHistory = []; // Clear local array
-            chatHistoryDiv.innerHTML = ''; // Clear display
+            chatHistory = []; 
+            chatHistoryDiv.innerHTML = ''; 
             
+            // Reset location state
+            userLocation = null;
+            updateLocationStatus('off');
+
             // Re-display initial welcome message
             initialMessageBox.classList.remove('hidden');
-            chatHistoryDiv.appendChild(initialMessageBox);
+            // Re-add the initial message box wrapper to the chat history 
+            const initialMessageContainer = document.createElement('div');
+            initialMessageContainer.className = 'model-bubble-container';
+            initialMessageContainer.appendChild(initialMessageBox);
+            chatHistoryDiv.appendChild(initialMessageContainer);
 
             systemStatusSpan.textContent = "Status: New Chat";
             console.log("Chat history cleared locally.");
         }
 
 
+        // --- Theme Toggle ---
+
+        const SUN_ICON = '<path d="M12 3v1.5m-4.5 7.5a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zm4.5 4.5v1.5m4.5-12.6l-1.06 1.06m-6.36 10.6l-1.06 1.06m-6.36-4.24H3m1.5 0h1.5m6.36-8.48l1.06 1.06m-10.6 6.36l1.06 1.06"></path>';
+        const MOON_ICON = '<path d="M12 3a9 9 0 109 9c0-.46-.04-.91-.1-1.35a.25.25 0 00-.33-.27.25.25 0 00-.27.33A7.5 7.5 0 0112 19.5a7.5 7.5 0 117.5-7.5c0 .46-.04.91-.1 1.35a.25.25 0 00-.33.27.25.25 0 00-.27-.33A7.5 7.5 0 0112 4.5a7.5 7.5 0 017.5 7.5 7.5 7.5 0 01-7.5 7.5.75.75 0 00.75.75c3.55 0 6.78-1.55 9-4.04a.75.75 0 00-1.28-.82c-2.02 2.22-4.9 3.56-8.22 3.56a9 9 0 01-9-9 9 9 0 0115-6.75A9 9 0 0012 3z"></path>';
+
+
+        window.toggleTheme = function() {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            updateThemeIcon(newTheme);
+            updateSystemStatusStyle(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            themeIcon.innerHTML = theme === 'dark' ? MOON_ICON : SUN_ICON;
+            themeIcon.setAttribute('fill', theme === 'dark' ? 'currentColor' : 'none');
+            themeIcon.setAttribute('stroke', theme === 'dark' ? 'none' : 'currentColor');
+            themeIcon.setAttribute('stroke-linecap', 'round');
+            themeIcon.setAttribute('stroke-linejoin', 'round');
+            themeIcon.setAttribute('stroke-width', '2');
+        }
+        
+        function updateSystemStatusStyle(theme) {
+            const isDark = theme === 'dark';
+            // General status bar styling
+            systemStatusSpan.classList.toggle('text-gray-400', isDark);
+            systemStatusSpan.classList.toggle('border-gray-700', isDark);
+            systemStatusSpan.classList.toggle('text-gray-700', !isDark);
+            systemStatusSpan.classList.toggle('border-gray-300', !isDark);
+        }
+
+
         // --- Image Handling ---
 
-        /**
-         * Clears the image preview and the global state.
-         */
         window.clearImage = function() {
             uploadedImage = null;
             imageInput.value = '';
@@ -347,10 +485,6 @@
             userInput.focus();
         }
 
-        /**
-         * Reads the uploaded file and updates the preview/global state.
-         * @param {Event} event - The file input change event.
-         */
         window.previewImage = function(event) {
             const file = event.target.files[0];
             if (!file) {
@@ -363,13 +497,11 @@
                 const base64String = e.target.result.split(',')[1];
                 const mimeType = file.type;
                 
-                // Set global state
                 uploadedImage = {
                     data: base64String,
                     mimeType: mimeType
                 };
 
-                // Update preview
                 imagePreview.src = e.target.result;
                 imagePreviewArea.classList.remove('hidden');
                 userInput.focus();
@@ -378,50 +510,182 @@
         }
 
         // --- Geolocation Functionality ---
+
+        function updateLocationStatus(state, message = '') {
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            
+            // Clear all state classes
+            locationStatusSpan.classList.remove('location-active', 'bg-cyan-900', 'text-cyan-200', 'bg-red-800', 'text-white', 'bg-gray-100', 'text-gray-700', 'bg-blue-200', 'text-blue-900', 'text-gray-400', 'border-gray-700', 'border-gray-300');
+            
+            if (state === 'acquiring') {
+                locationStatusSpan.textContent = 'Location: Acquiring...';
+                locationStatusSpan.classList.add('location-active');
+            } else if (state === 'acquired') {
+                const lat = userLocation.lat.toFixed(4);
+                const lon = userLocation.lon.toFixed(4);
+                locationStatusSpan.textContent = `Location: ${lat}, ${lon} (Acquired)`;
+                locationStatusSpan.classList.add(isDark ? 'bg-cyan-900' : 'bg-blue-200', isDark ? 'text-cyan-200' : 'text-blue-900');
+            } else if (state === 'denied') {
+                locationStatusSpan.textContent = `Location: Access Denied`;
+                locationStatusSpan.classList.add('bg-red-700', 'text-white');
+                // Show reminder modal
+                permissionModal.classList.remove('hidden');
+            } else { // 'off' or error
+                locationStatusSpan.textContent = `Location: Off${message ? ` (${message})` : ''}`;
+                locationStatusSpan.classList.add(isDark ? 'text-gray-400' : 'text-gray-700', isDark ? 'border-gray-700' : 'border-gray-300');
+            }
+        }
+
+
         window.getLocation = function() {
-            if (!navigator.geolocation) {
+            if (navigator.geolocation) {
+                updateLocationStatus('acquiring');
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lon: position.coords.longitude
+                        };
+                        updateLocationStatus('acquired');
+                        console.log("Location acquired:", userLocation);
+                    },
+                    (error) => {
+                        userLocation = null;
+                        if (error.code === error.PERMISSION_DENIED) {
+                            updateLocationStatus('denied');
+                        } else {
+                            updateLocationStatus('off', 'GPS Error');
+                            console.error("Geolocation Error:", error.message);
+                        }
+                    },
+                    { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 }
+                );
+            } else {
                 displayError("Geolocation is not supported by your browser.");
-                return;
+                updateLocationStatus('off', 'Unsupported');
+            }
+        }
+
+
+        // --- Text-to-Speech (TTS) Implementation ---
+        
+        /**
+         * Converts a base64 string to an ArrayBuffer.
+         */
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        /**
+         * Helper function to write a string into a DataView.
+         */
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        /**
+         * Converts 16-bit PCM data to a standard WAV Blob.
+         */
+        function pcmToWav(pcm16, sampleRate) {
+            const numChannels = 1;
+            const bytesPerSample = 2; // 16-bit PCM
+            const buffer = new ArrayBuffer(44 + pcm16.length * bytesPerSample);
+            const view = new DataView(buffer);
+            let offset = 0;
+
+            // RIFF chunk
+            writeString(view, offset, 'RIFF'); offset += 4;
+            view.setUint32(offset, 36 + pcm16.length * bytesPerSample, true); offset += 4;
+            writeString(view, offset, 'WAVE'); offset += 4;
+            
+            // fmt chunk
+            writeString(view, offset, 'fmt '); offset += 4;
+            view.setUint32(offset, 16, true); offset += 4;
+            view.setUint16(offset, 1, true); offset += 2; // Audio format (1 for PCM)
+            view.setUint16(offset, numChannels, true); offset += 2;
+            view.setUint32(offset, sampleRate, true); offset += 4;
+            view.setUint32(offset, sampleRate * numChannels * bytesPerSample, true); offset += 4; // Byte rate
+            view.setUint16(offset, numChannels * bytesPerSample, true); offset += 2; // Block align
+            view.setUint16(offset, bytesPerSample * 8, true); offset += 2; // Bits per sample
+            
+            // data chunk
+            writeString(view, offset, 'data'); offset += 4;
+            view.setUint32(offset, pcm16.length * bytesPerSample, true); offset += 4;
+
+            // Write PCM data
+            for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16[i], true);
             }
 
-            systemStatusSpan.textContent = "Status: Requesting Location...";
-            
-            locationBtn.disabled = true;
-            locationBtn.classList.add('opacity-50');
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    userLocation = {
-                        latitude: position.coords.latitude.toFixed(4),
-                        longitude: position.coords.longitude.toFixed(4)
-                    };
-                    systemStatusSpan.textContent = `Location: Lat ${userLocation.latitude}, Lon ${userLocation.longitude}`;
-                    
-                    locationBtn.disabled = false;
-                    // Change to a neon-like cyan color on success
-                    locationBtn.classList.remove('opacity-50', 'bg-gray-500', 'hover:bg-gray-600');
-                    locationBtn.classList.add('bg-cyan-500', 'hover:bg-cyan-600', 'shadow-cyan-500/50');
-                },
-                (error) => {
-                    locationBtn.disabled = false;
-                    locationBtn.classList.remove('opacity-50', 'bg-cyan-500', 'hover:bg-cyan-600', 'shadow-cyan-500/50');
-                    locationBtn.classList.add('bg-gray-500', 'hover:bg-gray-600');
-
-                    let errorMsg = "Could not retrieve location data.";
-                    if (error.code === error.PERMISSION_DENIED) {
-                        errorMsg = "Access Denied. Please enable location permissions.";
-                    }
-                    systemStatusSpan.textContent = `Status: Location Error (${errorMsg.split('.')[0]})`; // Keep status short
-                    userLocation = null; 
-                }
-            );
+            return new Blob([view], { type: 'audio/wav' });
         }
+
+
+        /**
+         * Calls the TTS model to convert text to speech and plays the audio.
+         */
+        async function speakText(text) {
+            const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{
+                    parts: [{ text: text }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: "Kore" } 
+                        }
+                    }
+                },
+                model: TTS_MODEL
+            };
+
+            try {
+                const response = await fetchWithRetry(TTS_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
+                    const rateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000; 
+
+                    const pcmDataBuffer = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmDataBuffer);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    
+                    const audioUrl = URL.createObjectURL(wavBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play().catch(e => console.error("Audio playback failed (browser restrictions?):", e));
+
+                } else {
+                    console.warn("TTS response missing audio data or incorrect mime type. This is likely expected in some API responses.");
+                }
+            } catch (error) {
+                console.error("TTS API Error:", error);
+            }
+        }
+
 
         // --- Main Send Message Function ---
 
-        /**
-         * Main function to send a message and get an AI response.
-         */
         window.sendMessage = async function() {
             const userQuery = userInput.value.trim();
             if (!userQuery && !uploadedImage) return;
@@ -433,29 +697,32 @@
             loadingIndicator.classList.remove('hidden');
             systemStatusSpan.textContent = "Status: Thinking...";
 
-            // 1. Prepare message parts for the user's display and API history
-            
-            // Add image part if present
+            // 1. Prepend location data to the query if available
+            let promptText = userQuery;
+            if (userLocation) {
+                // If the user didn't type anything but has an image/location, send the full prompt
+                // If the user typed something, prepend location data to it
+                promptText = `User Location: [${userLocation.lat.toFixed(6)}, ${userLocation.lon.toFixed(6)}]. Query: ${userQuery}`;
+            } else {
+                promptText = userQuery || "Image attached.";
+            }
+
             const currentImage = uploadedImage;
             
-            // Add text part 
-            let promptWithLocation = userQuery || "Analyze the image.";
-            if (userLocation) {
-                // Prepend location context to the user's message for the model's benefit
-                promptWithLocation = `(User Location: Lat ${userLocation.latitude}, Lon ${userLocation.longitude}) ${promptWithLocation}`;
-            }
-            
             // 2. Save the user's message to local memory/UI (before sending)
+            // We display the original user input (without the Location prefix)
             await saveMessage('user', userQuery || "Image attached.", currentImage);
             
-            // Clear image state immediately after saving the message to the history
+            // Clear location and image state immediately after using them
+            userLocation = null;
+            updateLocationStatus('off');
             clearImage();
 
             // 3. Prepare chat history for API (context)
-            // The saveMessage call above already pushed the latest user message to chatHistory.
-            // We use a limited slice of history for the API call to keep context relevant and fast.
             const contentsForApi = [...chatHistory]; 
-            const limitedContentsForApi = contentsForApi.slice(-10); // Last 10 turns for context
+            // The AI will see the full prompt (including location) as the last user message
+            contentsForApi[contentsForApi.length - 1].parts[0].text = promptText;
+            const limitedContentsForApi = contentsForApi.slice(-10); 
 
             const payload = {
                 contents: limitedContentsForApi, 
@@ -481,11 +748,13 @@
                     throw new Error("Received an empty or malformed response from the model. This might be due to content policy blocks or an API error.");
                 }
                 
-                // CRITICAL FIX: Strip markdown before displaying/saving
                 const cleanResponseText = stripMarkdown(modelResponseText);
 
                 // 4. Save the model response to local memory/UI
                 await saveMessage('model', cleanResponseText);
+                
+                // 5. Speak the response using TTS
+                await speakText(cleanResponseText);
 
             } catch (error) {
                 console.error("API Error:", error);
@@ -498,6 +767,21 @@
                 systemStatusSpan.textContent = "Status: Ready";
             }
         }
+        
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial theme based on the <html> attribute (which defaults to dark)
+            const initialTheme = body.getAttribute('data-theme') || 'dark';
+            updateThemeIcon(initialTheme);
+            updateSystemStatusStyle(initialTheme);
+            updateLocationStatus('off');
+            
+            // Re-wrap initial message for correct alignment
+            const initialMessageContainer = document.createElement('div');
+            initialMessageContainer.className = 'model-bubble-container';
+            initialMessageContainer.appendChild(initialMessageBox);
+            chatHistoryDiv.appendChild(initialMessageContainer);
+        });
     </script>
 </body>
 </html>
