@@ -883,7 +883,8 @@ body {
          * Converts text to speech and plays the audio via a user interaction (button click) or automatically.
          */
         async function speakText(text, button, autoPlay = false) {
-            const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${apiKey}`;
+           const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
+
             
             // If another audio is playing, stop it first
             stopAudioPlayback();
@@ -893,23 +894,26 @@ body {
             button.disabled = true;
             button.innerHTML = `<svg class="w-full h-full animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m15.356-2H15a.5.5 0 00-.5.5V11m5.356 2h-4.721c-1.399 0-2.5-1.101-2.5-2.5v-1c0-1.399 1.101-2.5 2.5-2.5H19m-4 12v-5h.582m-15.356 2A8.001 8.001 0 0119.418 15m-15.356 2H9a.5.5 0 00.5-.5V13m-5.356 2h4.721c1.399 0 2.5 1.101 2.5 2.5v1c0 1.399-1.101 2.5-2.5 2.5H5"></path></svg>`;
 
-            const payload = {
-                contents: [{
-                    // Updated TTS Instruction for clear, Indian accented Hindi/Hinglish
-                    parts: [{ text: `Aap ek professional, adabdaar Indian assistant hain. Please iss text ko Indian accent aur Hindi uchchaaran mein bolen: ${text}` }]
-                }],
-                generationConfig: {
-                    responseModalities: ["AUDIO"],
-                    speechConfig: {
-                        voiceConfig: {
-                            // CHANGED VOICE FROM 'Kore' (Female) to 'Orus' (Male)
-                            prebuiltVoiceConfig: { voiceName: "Orus" } 
-                        },
-                        languageCode: "hi-IN"
-                    }
-                },
-                model: TTS_MODEL
-            };
+           const payload = {
+  contents: [{
+    parts: [{
+      text: `Aap ek professional, adabdaar Indian assistant hain. 
+      Please iss text ko Indian accent aur Hindi uchchaaran mein bolen: ${text}`
+    }]
+  }],
+  
+  // ✅ Standard Google TTS config
+  audioConfig: {
+    voice: {
+      name: "Orus" // Male Indian tone (closest)
+    },
+    speakingRate: 1.0,
+    pitch: 0,
+    volumeGainDb: 0,
+    effectsProfileId: ["telephony-class-application"]
+  }
+};
+
 
             try {
                 const response = await fetchWithRetry(TTS_API_URL, {
@@ -919,9 +923,9 @@ body {
                 });
                 const result = await response.json();
                 
-                const part = result?.candidates?.[0]?.content?.parts?.[0];
-                const audioData = part?.inlineData?.data;
-                const mimeType = part?.inlineData?.mimeType;
+             const audioData = result?.candidates?.[0]?.audio?.data;
+const sampleRate = result?.candidates?.[0]?.audio?.sampleRateHz || 24000;
+
 
                 if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
                     const rateMatch = mimeType.match(/rate=(\d+)/);
