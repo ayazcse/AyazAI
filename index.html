@@ -7,239 +7,241 @@
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom CSS for Inter font and clean aesthetics */
-        body {
-            font-family: 'Inter', sans-serif;
-            /* Base styles for light mode: Warm Indian morning sun vibe */
-            background: linear-gradient(135deg, #fef9e7 0%, #fdf2e9 100%);
-            color: #1a202c; /* Dark Text */
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            margin: 0;
-            overflow: hidden; 
-        }
+       /* ========== GLOBAL VARIABLES ========== */
+:root {
+  --bg-light-start: #fef9e7;
+  --bg-light-end: #fdf2e9;
+  --bg-dark-start: #132a4e;
+  --bg-dark-end: #0a1930;
 
-        /* Dark Mode Overrides: Deep blue night sky */
-        .dark body {
-            background: linear-gradient(135deg, #132a4e 0%, #0a1930 100%);
-            color: #f3f4f6; /* Light Text */
-        }
-        
-        .app-container {
-            width: 100vw; 
-            height: 100vh; 
-            background-color: white;
-            border-radius: 0; 
-            box-shadow: none; 
-            /* Fix for iOS/Android keyboard pushing layout */
-            display: flex; /* Ensure it's a flex container */
-            flex-direction: column; /* Stack items vertically */
-        }
-        
-        .dark .app-container {
-            background-color: #1f2937; 
-        }
+  --text-light: #1a202c;
+  --text-dark: #f3f4f6;
 
-        /* Chat History Scroll Area */
-        #chat-history {
-            flex-grow: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch; 
-            padding: 1.5rem; 
-            /* Important: Ensures chat history shrinks when input area grows (keyboard) */
-            min-height: 0; 
-        }
+  --user-bg-light: #4caf50;
+  --user-text-light: #ffffff;
 
-        /* Message Bubbles - Light Mode: Desi style with a touch of saffron and green */
-        .model-bubble {
-            background-color: #ffe0b2; /* Light Saffron/Orange tone */
-            color: #795548; /* Warm Brown text */
-            font-size: 1.05rem; 
-            display: flex;
-            align-items: flex-end; /* Align contents to the bottom/right */
-        }
-        .user-bubble {
-            background-color: #4caf50; /* Green tone */
-            color: white;
-            font-size: 1.05rem;
-            text-align: left;
-        }
+  --model-bg-light: #ffe0b2;
+  --model-text-light: #795548;
 
-        /* Message Bubbles - Dark Mode: High contrast */
-        .dark .model-bubble {
-            background-color: #3e2723; /* Deep Brown/Red tone */
-            color: #ffcc80; /* Light Saffron/Orange tone */
-        }
-        .dark .user-bubble {
-            background-color: #81c784; /* Lighter green for dark mode contrast */
-            color: #1a202c; 
-        }
-        
-        .user-bubble, .model-bubble {
-            padding: 1rem 1.25rem;
-            word-wrap: break-word; 
-            overflow-wrap: break-word;
-            white-space: pre-wrap; 
-            max-width: 95%; /* Increased max-width for better use of space */
-            border-radius: 1.5rem 1.5rem 0.5rem 1.5rem; 
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease-in-out;
-            flex-direction: column;
-        }
-        .model-bubble {
-             border-radius: 1.5rem 1.5rem 1.5rem 0.5rem; 
-        }
-        
-        /* Updated Image Styling for multiple images */
-        .bubble-image {
-            max-height: 15rem; /* Slightly taller images in history */
-            width: 100%;
-            height: auto;
-            object-fit: contain;
-            border-radius: 0.75rem;
-            margin-bottom: 0.5rem; 
-            background-color: #fff; /* White background for visibility */
-            padding: 4px;
-        }
-        
-        /* Image Preview Wrapper Styling */
-        .image-preview-wrapper {
-            display: grid;
-            /* Responsive grid: 1 column on small screens, up to 4 on large */
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
-            gap: 1rem;
-            max-height: 200px; /* Limit height of the preview area */
-            overflow-y: auto;
-            padding-top: 0.5rem;
-        }
-        .preview-item {
-            position: relative;
-            background-color: #f0f0f0;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .preview-item img {
-            width: 100%;
-            height: 100px; /* Fixed height for consistent look */
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        .preview-item:hover img {
-            transform: scale(1.05);
-        }
-        .remove-image-btn-sm {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: rgba(255, 0, 0, 0.7);
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .remove-image-btn-sm:hover {
-            background-color: rgba(255, 0, 0, 1);
-        }
+  --user-bg-dark: #81c784;
+  --user-text-dark: #1a202c;
 
-        /* Container Fix: Ensure containers correctly align the bubbles */
-        .user-bubble-container {
-            align-self: flex-end; 
-            display: flex; 
-            justify-content: flex-end;
-        }
-        .model-bubble-container {
-            align-self: flex-start;
-            display: flex;
-            justify-content: flex-start;
-        }
+  --model-bg-dark: #3e2723;
+  --model-text-dark: #ffcc80;
+}
 
-        /* Typing Indicator Styles */
-        .typing-indicator-dot {
-            width: 8px; 
-            height: 8px;
-            background-color: #ff9800; /* Orange dot */
-            border-radius: 50%;
-            margin: 0 3px;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-        .dark .typing-indicator-dot {
-             background-color: #ffb74d; 
-        }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1.0); }
-        }
-        .typing-indicator-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator-dot:nth-child(2) { animation-delay: -0.16s; }
-        
-        /* Location Status Glow (using a saffron color) */
-        .location-active {
-            animation: pulse-border 1.5s infinite;
-        }
-        @keyframes pulse-border {
-            0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); } /* Deep Orange glow */
-            70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
-        }
-        
-        /* Input Field Styling */
-        #user-input {
-            border-radius: 9999px; 
-            padding-left: 1.5rem;
-            background-color: #f9fafb;
-            border: 2px solid #d1d5db;
-            color: #1a202c; 
-        }
-        .dark #user-input {
-            background-color: #374151;
-            border-color: #4b5563;
-            color: #f3f4f6;
-        }
-        
-        /* Audio Button Styling */
-        .audio-btn {
-            margin-left: 0.75rem;
-            background: none;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-            transition: color 0.2s, transform 0.2s;
-            color: #795548; /* Match bubble text color */
-        }
-        .dark .audio-btn {
-            color: #ffcc80;
-        }
-        .audio-btn:hover:not(:disabled) {
-            color: #ff9800;
-            transform: scale(1.1);
-        }
-        .audio-btn:disabled {
-            opacity: 0.5;
-            cursor: default;
-        }
-        
-        /* Pulsing Audio Icon when playing */
-        .audio-playing {
-            color: #ff9800 !important; /* Force orange color when playing */
-            animation: audio-pulse 1s infinite;
-        }
-        @keyframes audio-pulse {
-            0% { transform: scale(1.0); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.8; }
-            100% { transform: scale(1.0); opacity: 1; }
-        }
+/* ========== BASE SETUP ========== */
+html, body {
+  padding: 0;
+  margin: 0;
+  height: 100dvh; /* mobile safe viewport */
+  width: 100%;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Light Theme */
+body {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, var(--bg-light-start), var(--bg-light-end));
+  color: var(--text-light);
+}
+
+/* Dark Theme */
+.dark body {
+  background: linear-gradient(135deg, var(--bg-dark-start), var(--bg-dark-end));
+  color: var(--text-dark);
+}
+
+/* ========== APP CONTAINER ========== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  width: 100%;
+  background: #ffffff;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.dark .app-container {
+  background: #1f2937;
+}
+
+/* ========== CHAT AREA ========== */
+#chat-history {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* ========== CHAT BUBBLES ========== */
+.user-bubble, .model-bubble {
+  max-width: 90%;
+  padding: 0.9rem 1.15rem;
+  margin: 0.45rem 0;
+  border-radius: 1.4rem;
+  word-break: break-word;
+  white-space: pre-wrap;
+  font-size: 0.97rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* Align */
+.user-bubble-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.model-bubble-container {
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Light Mode Bubbles */
+.user-bubble {
+  background: var(--user-bg-light);
+  color: var(--user-text-light);
+  border-radius: 1.4rem 1.4rem 0.4rem 1.4rem;
+}
+
+.model-bubble {
+  background: var(--model-bg-light);
+  color: var(--model-text-light);
+  border-radius: 1.4rem 1.4rem 1.4rem 0.4rem;
+}
+
+/* Dark Mode Bubbles */
+.dark .user-bubble {
+  background: var(--user-bg-dark);
+  color: var(--user-text-dark);
+}
+
+.dark .model-bubble {
+  background: var(--model-bg-dark);
+  color: var(--model-text-dark);
+}
+
+/* ========== IMAGE IN CHAT BUBBLE ========== */
+.bubble-image {
+  width: 100%;
+  max-height: 12rem;
+  object-fit: contain;
+  border-radius: 0.6rem;
+  margin-bottom: 0.4rem;
+  background: #ffffff;
+  padding: 4px;
+}
+
+/* ========== IMAGE PREVIEW GRID (BEFORE SEND) ========== */
+.image-preview-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+  gap: 0.7rem;
+  max-height: 150px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.preview-item {
+  position: relative;
+  height: 90px;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  background: #e9ecef;
+}
+
+.preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-image-btn-sm {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  background: rgba(255, 60, 60, 0.85);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ========== INPUT BAR ========== */
+#user-input {
+  width: 100%;
+  border-radius: 50px;
+  border: 2px solid #d1d5db;
+  padding: 0.85rem 1.2rem;
+  background: #f9fafb;
+  font-size: 1rem;
+}
+
+.dark #user-input {
+  background: #374151;
+  border-color: #4b5563;
+  color: #ffffff;
+}
+
+/* ========== AUDIO & ACTION BUTTONS ========== */
+.audio-btn {
+  background: none;
+  border: none;
+  padding: 0.35rem;
+  cursor: pointer;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  transition: transform .18s;
+}
+
+.audio-btn:hover:not(:disabled) {
+  transform: scale(1.12);
+}
+
+.audio-playing {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ========== TYPING INDICATOR ========== */
+.typing-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff9800;
+  display: inline-block;
+  margin: 0 2px;
+  animation: bounce 1.3s infinite ease-in-out;
+}
+
+.dark .typing-indicator-dot {
+  background: #ffb74d;
+}
+
+.typing-indicator-dot:nth-child(1) { animation-delay: -0.28s; }
+.typing-indicator-dot:nth-child(2) { animation-delay: -0.14s; }
+
+@keyframes bounce {
+  0%,80%,100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
 
     </style>
 </head>
