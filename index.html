@@ -10,12 +10,12 @@
         /* Custom CSS for Inter font and chat aesthetics */
         body {
             font-family: 'Inter', sans-serif;
+            /* Transition kept for smooth element changes */
             transition: background-color 0.4s;
         }
         .container {
             max-width: 1000px;
         }
-        /* Removed fixed height for chat-container. Using Tailwind flex-grow for flexibility. */
         
         /* Shared Bubble Styling */
         .user-bubble, .model-bubble {
@@ -27,22 +27,8 @@
             white-space: pre-wrap; /* Preserve whitespace and line breaks for code/formatting */
         }
 
-        /* Light Mode Bubbles - Sharp and Clean */
-        .light .user-bubble {
-            background-color: #7c3aed; /* Violet-600 */
-            color: white;
-            border-radius: 1rem 1rem 0.25rem 1rem;
-            margin-left: auto;
-        }
-        .light .model-bubble {
-            background-color: #f3f4f6; /* Gray-100 */
-            color: #1f2937; /* Gray-800 */
-            border-radius: 1rem 1rem 1rem 0.25rem;
-            margin-right: auto;
-        }
-        
-        /* Dark Mode Bubbles - High Contrast & Neon */
-        .dark .user-bubble {
+        /* Enforced Dark Mode Bubbles - High Contrast & Neon */
+        .user-bubble {
             background-color: #22d3ee; /* Cyan-400 */
             color: #111827; /* Dark text for contrast */
             border-radius: 1rem 1rem 0.25rem 1rem;
@@ -50,7 +36,7 @@
             /* Neon effect on background for a future vibe */
             box-shadow: 0 0 10px rgba(34, 211, 238, 0.5); 
         }
-        .dark .model-bubble {
+        .model-bubble {
             background-color: #1f2937; /* Gray-800 */
             color: #d1d5db; /* Gray-300 */
             border-radius: 1rem 1rem 1rem 0.25rem;
@@ -70,42 +56,36 @@
         }
     </style>
 </head>
-<!-- Applying flexible layout for full screen height and responsiveness -->
-<!-- FIX: Swapped body background classes to make bg-gray-100 the default (light) and dark:bg-gray-950 the dark mode background. -->
-<body class="p-4 md:p-8 flex flex-col min-h-screen bg-gray-100 dark:bg-gray-950 transition-colors">
+<!-- Enforced Dark Mode Background -->
+<body class="p-4 md:p-8 flex flex-col min-h-screen bg-gray-950 transition-colors">
 
     <div class="container mx-auto w-full flex flex-col flex-grow">
-        <header class="text-center mb-6 flex justify-between items-center flex-shrink-0">
-            <!-- Action Group: Theme & New Chat -->
+        <header class="mb-6 flex justify-between items-center flex-shrink-0">
+            <!-- Action Group: Only New Chat remains -->
             <div class="flex space-x-2">
-                <!-- Theme Toggle -->
-                <button id="theme-toggle" class="p-3 rounded-full bg-gray-800 dark:bg-gray-700 text-gray-200 dark:text-cyan-400 transition-colors shadow-xl hover:shadow-cyan-500/50" onclick="toggleTheme()">
-                    <!-- Sun Icon (Light Mode) -->
-                    <svg id="sun-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    <!-- Moon Icon (Dark Mode) -->
-                    <svg id="moon-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                </button>
+                <!-- Theme Toggle Button REMOVED -->
                 
                 <!-- New Chat Button (Clear History) - Calls confirmation modal -->
                 <button id="new-chat-btn" 
-                        class="p-3 rounded-full bg-red-600 dark:bg-red-700 text-white transition-colors shadow-xl hover:shadow-red-500/50 hover:bg-red-700" 
+                        class="p-3 rounded-full bg-red-700 text-white transition-colors shadow-xl hover:shadow-red-500/50 hover:bg-red-800" 
                         onclick="showConfirmClearHistory()">
                     <!-- Trash/New Icon -->
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.387 7.054a2 2 0 01-1.995 2.5l-2.673-.535a2 2 0 01-1.995-2.5L9.26 9m1.06 4.676l-1.06-1.06M12 6h6"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5v-1a1 1 0 011-1h4a1 1 0 011 1v1M5 7h14a1 1 0 011 1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8a1 1 0 011-1z"></path></svg>
                 </button>
             </div>
             
-            <!-- Gradient Title - The 'AyazAI' Vibe -->
-            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-600 tracking-wider">AyazAI</h1>
+            <!-- Gradient Title - Centered Text -->
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-violet-600 tracking-wider text-center">AyazAI</h1>
             
-            <span id="system-status" class="text-sm text-gray-500 dark:text-gray-400 p-2 border border-gray-700 rounded-lg">Status: Ready</span>
+            <!-- Status Badge: Adjusted text color for dark mode -->
+            <span id="system-status" class="text-xs text-gray-400 p-2 border border-gray-700 rounded-lg hidden md:block flex-shrink-0">Status: Ready</span>
 
         </header>
 
-        <!-- Main Chat Box: Floating Panel Effect. Added flex-grow and overflow-hidden -->
-        <div class="bg-white dark:bg-gray-900 p-4 md:p-6 rounded-2xl shadow-2xl dark:shadow-violet-500/20 flex flex-col transition-colors border border-gray-200 dark:border-gray-800 flex-grow overflow-hidden">
-            <!-- Chat History Display. Added flex-grow and overflow-y-auto -->
-            <div id="chat-history" class="flex-grow overflow-y-auto mb-4 p-4 md:p-6 border border-gray-300 dark:border-gray-700 rounded-xl flex flex-col space-y-4 bg-gray-50 dark:bg-gray-950">
+        <!-- Main Chat Box: Enforced Dark Mode styling -->
+        <div class="bg-gray-900 p-4 md:p-6 rounded-2xl shadow-2xl shadow-violet-500/20 flex flex-col transition-colors border border-gray-800 flex-grow overflow-hidden">
+            <!-- Chat History Display. Enforced Dark Mode styling -->
+            <div id="chat-history" class="flex-grow overflow-y-auto mb-4 p-4 md:p-6 border border-gray-700 rounded-xl flex flex-col space-y-4 bg-gray-950">
                 <!-- Initial Welcome Message -->
                 <div id="initial-message-box" class="model-bubble p-3 shadow-md">
                     <span id="initial-message">Hello! I'm AyazAI, a local conversational engine. How can I assist you today?</span>
@@ -118,19 +98,19 @@
             </div>
 
             <!-- Chat Input Section. Added flex-shrink-0 -->
-            <div class="flex space-x-3 flex-shrink-0">
+            <div class="flex space-x-2 flex-shrink-0">
                 
-                <!-- Location Button -->
+                <!-- Location Button (Reduced padding from px-3 to p-2 for space) -->
                 <button id="location-btn" 
-                        class="px-3 bg-gray-500 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all shadow-md flex items-center justify-center hover:bg-gray-600"
+                        class="p-2 bg-gray-500 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all shadow-md flex items-center justify-center hover:bg-gray-600"
                         onclick="getLocation()">
                     <!-- Map Pin Icon -->
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </button>
                 
-                <!-- Image Upload Button -->
+                <!-- Image Upload Button (Reduced padding from px-3 to p-2 for space) -->
                 <button id="image-upload-btn" 
-                        class="px-3 bg-violet-600 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-violet-500 transition-all shadow-md flex items-center justify-center hover:bg-violet-700"
+                        class="p-2 bg-violet-600 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-violet-500 transition-all shadow-md flex items-center justify-center hover:bg-violet-700"
                         onclick="document.getElementById('image-input').click()">
                     <!-- Camera Icon -->
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.414 5h3.172a2 2 0 011.664.89l.812 1.22a2 2 0 001.664.89H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -141,41 +121,41 @@
 
 
                 <input type="text" id="user-input" placeholder="Initiate conversation..."
-                        class="flex-grow p-4 border-2 border-violet-400 dark:border-cyan-500 rounded-xl focus:ring-violet-500 focus:border-violet-500 dark:bg-gray-800 dark:text-gray-100 transition-colors placeholder-gray-500 dark:placeholder-gray-400"
+                        class="flex-grow p-4 border-2 border-violet-400 border-cyan-500 rounded-xl focus:ring-violet-500 focus:border-violet-500 bg-gray-800 text-gray-100 transition-colors placeholder-gray-400 min-w-0"
                         onkeypress="if(event.key === 'Enter') sendMessage()">
                 
-                <!-- Send Button: Neon Violet Accent -->
+                <!-- Send Button: Reduced horizontal padding from px-6 to px-4 for space -->
                 <button id="send-btn" 
-                        class="px-6 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-500 focus:ring-opacity-70 transition-all shadow-lg dark:shadow-violet-500/50 flex items-center justify-center"
+                        class="px-4 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-500 focus:ring-opacity-70 transition-all shadow-lg shadow-violet-500/50 flex items-center justify-center"
                         onclick="sendMessage()">
                     <svg id="button-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </button>
             </div>
             
             <!-- Image Preview Area. Added flex-shrink-0 -->
-            <div id="image-preview-area" class="mt-3 p-3 flex-shrink-0 bg-gray-100 dark:bg-gray-800 rounded-lg hidden">
-                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Image attached (will be sent with next message):</p>
+            <div id="image-preview-area" class="mt-3 p-3 flex-shrink-0 bg-gray-800 rounded-lg hidden">
+                <p class="text-sm font-semibold text-gray-300 mb-2">Image attached (will be sent with next message):</p>
                 <img id="image-preview" class="max-h-40 rounded-lg object-contain mb-2" src="" alt="Image Preview">
                 <button onclick="clearImage()" class="text-sm text-red-500 hover:text-red-600">Remove Image</button>
             </div>
 
 
-            <!-- Custom Modal for Errors -->
+            <!-- Custom Modal for Errors: Adjusted colors -->
             <div id="error-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
-                <div class="bg-white dark:bg-gray-700 rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl dark:shadow-red-600/50">
-                    <h3 class="text-xl font-bold text-red-600 mb-3 dark:text-red-400">Error: System Alert</h3>
-                    <p id="error-message" class="text-gray-700 mb-4 dark:text-gray-200">An unknown error occurred.</p>
+                <div class="bg-gray-700 rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl shadow-red-600/50">
+                    <h3 class="text-xl font-bold text-red-400 mb-3">Error: System Alert</h3>
+                    <p id="error-message" class="text-gray-200 mb-4">An unknown error occurred.</p>
                     <button class="w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700" onclick="document.getElementById('error-modal').classList.add('hidden')">Acknowledge</button>
                 </div>
             </div>
             
-            <!-- Custom Modal for Confirmation (New Chat) -->
+            <!-- Custom Modal for Confirmation (New Chat): Adjusted colors -->
             <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
-                <div class="bg-white dark:bg-gray-700 rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl dark:shadow-violet-600/50">
-                    <h3 class="text-xl font-bold text-violet-600 mb-3 dark:text-violet-400">Confirm New Chat</h3>
-                    <p class="text-gray-700 mb-6 dark:text-gray-200">Are you sure you want to start a new chat? This will clear all messages in your local memory for this session.</p>
+                <div class="bg-gray-700 rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl shadow-violet-600/50">
+                    <h3 class="text-xl font-bold text-violet-400 mb-3">Confirm New Chat</h3>
+                    <p class="text-gray-200 mb-6">Are you sure you want to start a new chat? This will clear all messages in your local memory for this session.</p>
                     <div class="flex justify-end space-x-3">
-                        <button class="py-2 px-4 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400" onclick="document.getElementById('confirm-modal').classList.add('hidden')">Cancel</button>
+                        <button class="py-2 px-4 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600" onclick="document.getElementById('confirm-modal').classList.add('hidden')">Cancel</button>
                         <button class="py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700" onclick="performClearHistory()">Clear History</button>
                     </div>
                 </div>
@@ -201,13 +181,11 @@
         const loadingIndicator = document.getElementById('loading-indicator');
         const errorModal = document.getElementById('error-modal');
         const errorMessage = document.getElementById('error-message');
-        const confirmModal = document.getElementById('confirm-modal'); // New
+        const confirmModal = document.getElementById('confirm-modal'); 
         const systemStatusSpan = document.getElementById('system-status');
         const initialMessageBox = document.getElementById('initial-message-box');
         const initialMessageSpan = document.getElementById('initial-message');
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const sunIcon = document.getElementById('sun-icon');
-        const moonIcon = document.getElementById('moon-icon');
+        // Theme-related elements removed
         const imageInput = document.getElementById('image-input');
         const imagePreview = document.getElementById('image-preview');
         const imagePreviewArea = document.getElementById('image-preview-area');
@@ -217,36 +195,8 @@
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
         const SYSTEM_PROMPT = "You are a friendly, concise, and helpful conversational assistant. Maintain context and memory throughout the conversation. For any query requiring current or real-time information (like weather, news, or recent events), you must use your search tool. Your persona is a high-tech AI named AyazAI. Since this application runs locally without a database, your memory only lasts for this session. Your responses must be in plain text and should not use markdown formatting like **bolding** or *italics* as the client UI handles formatting.";
 
-        // --- Theme Management ---
+        // --- Theme Management Removed ---
 
-        /**
-         * Applies the selected theme and saves it to localStorage.
-         * @param {string} theme - 'light' or 'dark'.
-         */
-        function applyTheme(theme) {
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                moonIcon.classList.add('hidden');
-                sunIcon.classList.remove('hidden');
-            } else {
-                document.documentElement.classList.remove('dark');
-                moonIcon.classList.remove('hidden');
-                sunIcon.classList.add('hidden');
-            }
-            localStorage.setItem('theme', theme);
-        }
-
-        /**
-         * Toggles the current theme.
-         */
-        window.toggleTheme = function() {
-            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-            applyTheme(newTheme);
-        }
-        
-        // Load theme preference on startup
-        const preferredTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        applyTheme(preferredTheme);
         
         // --- Utility Functions ---
 
@@ -299,8 +249,8 @@
             // Remove common bold/italics markers: **, *, _, and also code fences (```)
             let cleanedText = text.replace(/```.*?```/gs, ''); // Remove fenced code blocks completely (safer than trying to format)
             cleanedText = cleanedText.replace(/\*\*/g, ''); // Remove double asterisks (bold)
-            cleanedText = cleanedText.replace(/\*/g, '');  // Remove single asterisks (italics/emphasis)
-            cleanedText = cleanedText.replace(/_/g, '');  // Remove underscores (italics/emphasis)
+            cleanedText = cleanedText.replace(/\*/g, '');  // Remove single asterisks (italics/emphasis)
+            cleanedText = cleanedText.replace(/_/g, '');  // Remove underscores (italics/emphasis)
             
             return cleanedText.trim();
         }
