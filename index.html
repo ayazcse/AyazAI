@@ -35,6 +35,9 @@
             background-color: white;
             border-radius: 0; 
             box-shadow: none; 
+            /* Fix for iOS/Android keyboard pushing layout */
+            display: flex; /* Ensure it's a flex container */
+            flex-direction: column; /* Stack items vertically */
         }
         
         .dark .app-container {
@@ -47,6 +50,8 @@
             overflow-y: auto;
             -webkit-overflow-scrolling: touch; 
             padding: 1.5rem; 
+            /* Important: Ensures chat history shrinks when input area grows (keyboard) */
+            min-height: 0; 
         }
 
         /* Message Bubbles - Light Mode: Desi style with a touch of saffron and green */
