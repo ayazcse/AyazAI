@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="icon" type="image/png" href="https://www.google.com/url?sa=i&url=https%3A%2F%2Fin.pinterest.com%2Fpin%2Fcircle-a-letter-logo-modern-a-logo--844143523939836583%2F&psig=AOvVaw0fy0AsufOwzZGFYhbkCut0&ust=1762611385707000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCJDLoZ6d4JADFQAAAAAdAAAAABAK">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI:az - The Respectful Assistant</title>
@@ -252,10 +254,6 @@ body {
     <div class="app-container flex flex-col transition-colors duration-300 overflow-hidden">
         
         <!-- Header Section -->
-        <!-- Add this inside your <nav> or top header section -->
-<div class="logo">
-    <img src=https://www.google.com/url?sa=i&url=https%3A%2F%2Fin.pinterest.com%2Fpin%2Fcircle-a-letter-logo-modern-a-logo--844143523939836583%2F&psig=AOvVaw0fy0AsufOwzZGFYhbkCut0&ust=1762611385707000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCJDLoZ6d4JADFQAAAAAdAAAAABAK" alt="AI:az Logo" style="height:48px;">
-</div>
 
         <header class="p-3 flex justify-between items-center border-b shadow-md flex-shrink-0 bg-white dark:bg-gray-900 dark:border-gray-700 transition-colors duration-300 flex-wrap">
             
@@ -975,10 +973,9 @@ const sampleRate = result?.candidates?.[0]?.audio?.sampleRateHz || 24000;
                     displayError("TTS API se sahi audio data nahi aaya (Did not receive proper audio data from TTS API). Kripya dobara try karein, huzoor.");
                     stopAudioPlayback();
                 }
-            } catch (error) {
-                console.error("TTS API Error during speech generation:", error);
-                displayError("Something went wrong in TTS service ,Check Network.");
-                stopAudioPlayback();
+            }//// catch (error) {
+              //  console.error("TTS API Error during speech generation:", error);
+              //  stopAudioPlayback();
             }
         }
         
