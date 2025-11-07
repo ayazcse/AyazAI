@@ -246,11 +246,17 @@ body {
     </style>
 </head>
 <body class="p-0 m-0 transition-colors duration-300">
+    
 
     <!-- Main App Container (Takes up the whole screen) -->
     <div class="app-container flex flex-col transition-colors duration-300 overflow-hidden">
         
         <!-- Header Section -->
+        <!-- Add this inside your <nav> or top header section -->
+<div class="logo">
+    <img src=https://www.google.com/url?sa=i&url=https%3A%2F%2Fin.pinterest.com%2Fpin%2Fcircle-a-letter-logo-modern-a-logo--844143523939836583%2F&psig=AOvVaw0fy0AsufOwzZGFYhbkCut0&ust=1762611385707000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCJDLoZ6d4JADFQAAAAAdAAAAABAK" alt="AI:az Logo" style="height:48px;">
+</div>
+
         <header class="p-3 flex justify-between items-center border-b shadow-md flex-shrink-0 bg-white dark:bg-gray-900 dark:border-gray-700 transition-colors duration-300 flex-wrap">
             
             <!-- Group 1: Toggle, New Chat, Title -->
@@ -300,7 +306,7 @@ body {
             <!-- Typing Indicator (Replaced by just Loading) -->
             <div id="typing-indicator" class="hidden my-2 model-bubble-container">
                 <div class="model-bubble text-sm text-gray-600 dark:text-gray-300 flex items-center p-3">
-                    <span class="mr-3 font-semibold">AI:az likh raha hai...</span>
+                    <span class="mr-3 font-semibold">AI:az is typing...</span>
                     <div class="flex">
                         <div class="typing-indicator-dot"></div>
                         <div class="typing-indicator-dot"></div>
@@ -971,7 +977,7 @@ const sampleRate = result?.candidates?.[0]?.audio?.sampleRateHz || 24000;
                 }
             } catch (error) {
                 console.error("TTS API Error during speech generation:", error);
-                displayError("TTS service mein koi gadbad ho gayi (Something went wrong in TTS service). Kripya network check karein, sir.");
+                displayError("Something went wrong in TTS service ,Check Network.");
                 stopAudioPlayback();
             }
         }
