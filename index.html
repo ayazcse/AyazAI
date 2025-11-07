@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/png" href="https://www.google.com/url?sa=i&url=https%3A%2F%2Fin.pinterest.com%2Fpin%2Fcircle-a-letter-logo-modern-a-logo--844143523939836583%2F&psig=AOvVaw0fy0AsufOwzZGFYhbkCut0&ust=1762611385707000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCJDLoZ6d4JADFQAAAAAdAAAAABAK">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI:az - The Respectful Assistant</title>
@@ -242,241 +240,6 @@
             50% { transform: scale(1.2); opacity: 0.8; }
             100% { transform: scale(1.0); opacity: 1; }
         }
-       /* ========== GLOBAL VARIABLES ========== */
-:root {
-  --bg-light-start: #fef9e7;
-  --bg-light-end: #fdf2e9;
-  --bg-dark-start: #132a4e;
-  --bg-dark-end: #0a1930;
-
-  --text-light: #1a202c;
-  --text-dark: #f3f4f6;
-
-  --user-bg-light: #4caf50;
-  --user-text-light: #ffffff;
-
-  --model-bg-light: #ffe0b2;
-  --model-text-light: #795548;
-
-  --user-bg-dark: #81c784;
-  --user-text-dark: #1a202c;
-
-  --model-bg-dark: #3e2723;
-  --model-text-dark: #ffcc80;
-}
-
-/* ========== BASE SETUP ========== */
-html, body {
-  padding: 0;
-  margin: 0;
-  height: 100dvh; /* mobile safe viewport */
-  width: 100%;
-  overflow: hidden;
-  font-family: 'Inter', sans-serif;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Light Theme */
-body {
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(135deg, var(--bg-light-start), var(--bg-light-end));
-  color: var(--text-light);
-}
-
-/* Dark Theme */
-.dark body {
-  background: linear-gradient(135deg, var(--bg-dark-start), var(--bg-dark-end));
-  color: var(--text-dark);
-}
-
-/* ========== APP CONTAINER ========== */
-.app-container {
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  width: 100%;
-  background: #ffffff;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.dark .app-container {
-  background: #1f2937;
-}
-
-/* ========== CHAT AREA ========== */
-#chat-history {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem;
-  min-height: 0;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-}
-
-/* ========== CHAT BUBBLES ========== */
-.user-bubble, .model-bubble {
-  max-width: 90%;
-  padding: 0.9rem 1.15rem;
-  margin: 0.45rem 0;
-  border-radius: 1.4rem;
-  word-break: break-word;
-  white-space: pre-wrap;
-  font-size: 0.97rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-/* Align */
-.user-bubble-container {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.model-bubble-container {
-  display: flex;
-  justify-content: flex-start;
-}
-
-/* Light Mode Bubbles */
-.user-bubble {
-  background: var(--user-bg-light);
-  color: var(--user-text-light);
-  border-radius: 1.4rem 1.4rem 0.4rem 1.4rem;
-}
-
-.model-bubble {
-  background: var(--model-bg-light);
-  color: var(--model-text-light);
-  border-radius: 1.4rem 1.4rem 1.4rem 0.4rem;
-}
-
-/* Dark Mode Bubbles */
-.dark .user-bubble {
-  background: var(--user-bg-dark);
-  color: var(--user-text-dark);
-}
-
-.dark .model-bubble {
-  background: var(--model-bg-dark);
-  color: var(--model-text-dark);
-}
-
-/* ========== IMAGE IN CHAT BUBBLE ========== */
-.bubble-image {
-  width: 100%;
-  max-height: 12rem;
-  object-fit: contain;
-  border-radius: 0.6rem;
-  margin-bottom: 0.4rem;
-  background: #ffffff;
-  padding: 4px;
-}
-
-/* ========== IMAGE PREVIEW GRID (BEFORE SEND) ========== */
-.image-preview-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
-  gap: 0.7rem;
-  max-height: 150px;
-  overflow-y: auto;
-  margin-top: 0.5rem;
-  -webkit-overflow-scrolling: touch;
-}
-
-.preview-item {
-  position: relative;
-  height: 90px;
-  border-radius: 0.6rem;
-  overflow: hidden;
-  background: #e9ecef;
-}
-
-.preview-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.remove-image-btn-sm {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  font-size: 12px;
-  font-weight: bold;
-  background: rgba(255, 60, 60, 0.85);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ========== INPUT BAR ========== */
-#user-input {
-  width: 100%;
-  border-radius: 50px;
-  border: 2px solid #d1d5db;
-  padding: 0.85rem 1.2rem;
-  background: #f9fafb;
-  font-size: 1rem;
-}
-
-.dark #user-input {
-  background: #374151;
-  border-color: #4b5563;
-  color: #ffffff;
-}
-
-/* ========== AUDIO & ACTION BUTTONS ========== */
-.audio-btn {
-  background: none;
-  border: none;
-  padding: 0.35rem;
-  cursor: pointer;
-  font-size: 1.4rem;
-  display: flex;
-  align-items: center;
-  transition: transform .18s;
-}
-
-.audio-btn:hover:not(:disabled) {
-  transform: scale(1.12);
-}
-
-.audio-playing {
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.25); opacity: 0.7; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* ========== TYPING INDICATOR ========== */
-.typing-indicator-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ff9800;
-  display: inline-block;
-  margin: 0 2px;
-  animation: bounce 1.3s infinite ease-in-out;
-}
-
-.dark .typing-indicator-dot {
-  background: #ffb74d;
-}
-
-.typing-indicator-dot:nth-child(1) { animation-delay: -0.28s; }
-.typing-indicator-dot:nth-child(2) { animation-delay: -0.14s; }
-
-@keyframes bounce {
-  0%,80%,100% { transform: scale(0); }
-  40% { transform: scale(1); }
-}
 
     </style>
 </head>
@@ -484,13 +247,13 @@ body {
 
     <!-- Main App Container (Takes up the whole screen) -->
     <div class="app-container flex flex-col transition-colors duration-300 overflow-hidden">
-
+        
         <!-- Header Section -->
         <header class="p-3 flex justify-between items-center border-b shadow-md flex-shrink-0 bg-white dark:bg-gray-900 dark:border-gray-700 transition-colors duration-300 flex-wrap">
-
+            
             <!-- Group 1: Toggle, New Chat, Title -->
             <div class="flex items-center space-x-2 flex-grow min-w-0">
-
+                
                 <!-- Theme Toggle Button -->
                 <button id="theme-toggle-btn" 
                         class="p-2 rounded-full text-orange-500 dark:text-yellow-400 bg-orange-100 dark:bg-gray-700 transition-colors hover:bg-orange-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-orange-300 dark:focus:ring-yellow-500 shadow-md w-10 h-10 flex items-center justify-center flex-shrink-0" 
@@ -499,7 +262,7 @@ body {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
                     </svg>
                 </button>
-
+                
                 <!-- New Chat Button -->
                 <button id="new-chat-btn" 
                         class="p-2 rounded-full bg-red-600 text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-400 shadow-md w-10 h-10 flex items-center justify-center flex-shrink-0" 
@@ -507,13 +270,13 @@ body {
                     <!-- Trash/New Icon -->
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.387 7.054a2 2 0 01-1.995 2.5l-2.673-.535a2 2 0 01-1.995-2.5L9.26 9m1.06 4.676l-1.06-1.06M12 6h6"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5v-1a1 1 0 011-1h4a1 1 0 011 1v1M5 7h14a1 1 0 011 1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8a1 1 0 011-1z"></path></svg>
                 </button>
-
+                
                 <!-- AI:az Title (Renamed and styled with Indian flag colors) -->
                 <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-green-600 tracking-tight ml-2 truncate mr-auto">
                     AI:az
                 </h1>
             </div>
-
+            
             <!-- Group 2: Status Badge & Location (Consolidated) -->
             <div class="flex items-center space-x-2 text-right flex-shrink-0 mt-1 sm:mt-0"> 
                 <span id="system-status" class="text-xs p-1 px-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-300 font-semibold">Status: Ready</span>
@@ -531,7 +294,7 @@ body {
                     <span id="initial-message" class="flex-grow">Namaste. Main AI:az hoon, aapka sahayak. Ab main aapse aasaan Hindi mein baat karunga. Audio bhi ab Hindi accent mein shuru hoga. Aapki kya seva karoon, huzoor?</span>
                 </div>
             </div>
-
+            
             <!-- Typing Indicator (Replaced by just Loading) -->
             <div id="typing-indicator" class="hidden my-2 model-bubble-container">
                 <div class="model-bubble text-sm text-gray-600 dark:text-gray-300 flex items-center p-3">
@@ -557,28 +320,28 @@ body {
 
         <!-- Chat Input Section -->
         <div class="p-2 border-t flex space-x-2 flex-shrink-0 bg-white dark:bg-gray-900 dark:border-gray-700 transition-colors duration-300 shadow-inner">
-
+            
             <!-- Location Button (Map Icon) -->
             <button id="location-btn" 
                     class="p-2 bg-orange-500 text-white rounded-full focus:outline-none focus:ring-4 focus:ring-orange-300 transition-all hover:bg-orange-600 shadow-lg flex items-center justify-center w-12 h-12 flex-shrink-0 hover:scale-105" 
                     onclick="getLocation()">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243m.707-8.243a7 7 0 119.899 9.899L12 20.908l-5.303-5.303a7 7 0 019.899-9.899z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </button>
-
+            
             <!-- Image Upload Button (Now handles multiple selection) -->
             <button id="image-upload-btn" 
                     class="p-2 bg-green-500 text-white rounded-full focus:outline-none focus:ring-4 focus:ring-green-300 transition-all hover:bg-green-600 shadow-lg flex items-center justify-center w-12 h-12 flex-shrink-0 hover:scale-105"
                     onclick="document.getElementById('image-input').click()">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 16m-1-4V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2v-3"></path></svg>
             </button>
-
+            
             <!-- Hidden File Input (Modified to allow multiple files) -->
             <input type="file" id="image-input" accept="image/*" class="hidden" multiple onchange="previewImages(event)">
 
             <input type="text" id="user-input" placeholder="Aapka sawaal kya hai, huzoor?"
                     class="flex-grow p-3 border rounded-full focus:ring-orange-500 focus:border-orange-500 transition-colors placeholder-gray-400 text-base dark:text-white"
                     onkeypress="if(event.key === 'Enter') sendMessage()">
-
+            
             <!-- Send Button -->
             <button id="send-btn" 
                     class="p-2 bg-gradient-to-r from-orange-500 to-green-600 text-white rounded-full hover:from-orange-600 hover:to-green-700 focus:outline-none focus:ring-4 focus:ring-orange-300 transition-all shadow-xl w-12 h-12 flex items-center justify-center flex-shrink-0 hover:scale-105"
@@ -586,7 +349,7 @@ body {
                 <svg id="button-icon" class="w-6 h-6 rotate-90" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.25a.75.75 0 01.75.75v16.19l3.72-3.72a.75.75 0 111.06 1.06l-5 5a.75.75 0 01-1.06 0l-5-5a.75.75 0 111.06-1.06l3.72 3.72V3a.75.75 0 01.75-.75z"></path></svg>
             </button>
         </div>
-
+        
         <!-- Custom Modal for Errors -->
         <div id="error-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm transform transition-all shadow-2xl">
@@ -595,7 +358,7 @@ body {
                 <button class="w-full py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition" onclick="document.getElementById('error-modal').classList.add('hidden')">Theek Hai (Acknowledge)</button>
             </div>
         </div>
-
+        
         <!-- Custom Modal for Confirmation (New Chat) -->
         <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm transform transition-all shadow-2xl">
@@ -607,7 +370,7 @@ body {
                 </div>
             </div>
         </div>
-
+        
         <!-- Location Permission Modal -->
         <div id="permission-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm transform transition-all shadow-2xl">
@@ -622,7 +385,7 @@ body {
 
     <script type="module">
         // --- API Key Comment ---
-        const apiKey = "AIzaSyCy33W95OXXwcMzghPtuRrbnlwxOWry4Qw"; 
+        const apiKey = ""; 
 
         // --- Global State ---
         let userLocation = null; 
@@ -632,7 +395,7 @@ body {
         let currentAudio = null; // To track currently playing audio instance
         let currentAudioButton = null; // To track the button associated with currentAudio
         let typingInterval = null; // To track the typing animation interval
-
+        
         // --- DOM Elements ---
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
@@ -657,11 +420,11 @@ body {
         const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
         const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
-
+        
         // UPDATED SYSTEM PROMPT: Ab sirf aasaan Hindi aur adab se baat karega (Writing in English letters)
         const SYSTEM_PROMPT = "Aap AI:az, ek bahut hi madadgaar, adabdaar aur professional assistant hain. Aap hamesha saral aur aasaan Hindi mein jawaab denge. Aapko hamesha adab se, jaise 'huzoor', 'aapki seva mein', 'jee', 'shukriya' jaise shabdon ka istemaal karna hai. Latest information ke liye search tool ka istemaal zaroor karein. Aapke jawab sirf plain text mein hone chahiye, koi bolding ya italics nahi.";
 
-
+        
         // --- Theme Management ---
 
         function setTheme(theme) {
@@ -727,14 +490,14 @@ body {
                 }
             }
         }
-
+        
         function stripMarkdown(text) {
             // Remove code blocks, bolding, and italics.
             let cleanedText = text.replace(/```.*?```/gs, ''); 
             cleanedText = cleanedText.replace(/\*\*/g, ''); 
             cleanedText = cleanedText.replace(/\*/g, '');  
             cleanedText = cleanedText.replace(/_/g, '');  
-
+            
             return cleanedText.trim();
         }
 
@@ -747,44 +510,44 @@ body {
             if (chatHistory.length > 0 && !initialMessageBox.classList.contains('hidden')) {
                 initialMessageBox.classList.add('hidden');
             }
-
+            
             const messageContainer = document.createElement('div');
             messageContainer.className = `${role}-bubble-container mb-4`;
 
             const messageWrapper = document.createElement('div');
             // Add flex layout to manage the text content and the audio button side-by-side
             messageWrapper.className = `${role}-bubble shadow-lg flex items-end`; 
-
+            
             if (imageUrls.length > 0) {
                 // Create a container for multiple images in the chat history bubble
                 const imageGrid = document.createElement('div');
                 imageGrid.className = 'w-full grid gap-2 mb-2 p-1' + 
                                        ' grid-cols-2 sm:grid-cols-3 md:grid-cols-4'; 
-
+                
                 imageUrls.forEach(url => {
                     const img = document.createElement('img');
                     img.src = url;
                     img.className = 'bubble-image w-full h-auto max-h-40'; // Adjusted class for history view
                     img.loading = 'lazy';
-
+                    
                     const imgWrapper = document.createElement('div');
                     imgWrapper.className = 'rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700';
                     imgWrapper.appendChild(img);
                     imageGrid.appendChild(imgWrapper);
                 });
-
+                
                 messageWrapper.appendChild(imageGrid);
             }
 
             const textSpan = document.createElement('span');
             textSpan.textContent = text; // Initial text (empty for model reply)
             textSpan.className = 'flex-grow'; // Allows text to take up most space
-
+            
             // Only add the text span if it has content or if it's the user's side of an image message
             if (text || role === 'user' || imageUrls.length === 0) {
                  messageWrapper.appendChild(textSpan);
             }
-
+            
             // Add Audio Button only for Model replies
             let audioButton = null;
             if (role === 'model') {
@@ -795,14 +558,14 @@ body {
                 audioButton.onclick = () => handleAudioPlayback(audioButton);
                 audioButton.disabled = true; // Disable until typing is complete
                 messageWrapper.appendChild(audioButton);
-
+                
                 // Note: dataset.fullText is set in sendMessage for model replies
             }
 
             messageContainer.appendChild(messageWrapper);
             chatHistoryDiv.appendChild(messageContainer);
             chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; 
-
+            
             return {textSpan, audioButton};
         }
 
@@ -812,7 +575,7 @@ body {
         function typeText(element, text, delay = 35, callback = null) {
             let i = 0;
             element.textContent = ''; 
-
+            
             if (typingInterval) {
                 clearInterval(typingInterval);
             }
@@ -832,21 +595,21 @@ body {
                 }
             }, delay);
         }
-
+        
         // Modified to accept an array of image objects
         async function saveMessage(role, text, images = []) {
             const parts = [];
-
+            
             // Add all image parts
             images.forEach(image => {
                 parts.push({ inlineData: { data: image.data, mimeType: image.mimeType } });
             });
-
+            
             const messageText = text || (role === 'user' && images.length > 0 ? "Multiple images attached." : (text || "Response"));
             parts.push({ text: messageText });
 
             const message = { role, parts };
-
+            
             chatHistory.push(message);
         }
 
@@ -857,13 +620,13 @@ body {
 
         window.performClearHistory = function() {
             confirmModal.classList.add('hidden');
-
+            
             stopAudioPlayback(); // Stop audio on clear
             if (typingInterval) clearInterval(typingInterval); // Stop typing
 
             chatHistory = []; 
             chatHistoryDiv.innerHTML = ''; 
-
+            
             userLocation = null;
             updateLocationStatus('off');
 
@@ -902,47 +665,47 @@ body {
             imageCountText.textContent = "Image Attached (Ekdum Sahi): 0 Images";
             userInput.focus();
         }
-
+        
         window.removeImage = function(index) {
             uploadedImages.splice(index, 1);
             renderPreviews();
             userInput.focus();
         }
-
+        
         function renderPreviews() {
             uploadedImagePreviewsDiv.innerHTML = '';
-
+            
             if (uploadedImages.length === 0) {
                 imagePreviewArea.classList.add('hidden');
                 imageCountText.textContent = "Image Attached (Ekdum Sahi): 0 Images";
                 return;
             }
-
+            
             imagePreviewArea.classList.remove('hidden');
             imageCountText.textContent = `Image Attached (Ekdum Sahi): ${uploadedImages.length} Images`;
 
             uploadedImages.forEach((image, index) => {
                 const previewItem = document.createElement('div');
                 previewItem.className = 'preview-item';
-
+                
                 const img = document.createElement('img');
                 img.src = image.dataUrl;
                 img.alt = `Preview ${index + 1}`;
                 img.loading = 'lazy';
-
+                
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'remove-image-btn-sm';
                 removeBtn.textContent = 'X';
                 removeBtn.title = `Hatao Image ${index + 1}`;
                 removeBtn.onclick = () => removeImage(index);
-
+                
                 previewItem.appendChild(img);
                 previewItem.appendChild(removeBtn);
                 uploadedImagePreviewsDiv.appendChild(previewItem);
             });
             chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; // Scroll to bottom to show preview area
         }
-
+        
         window.previewImages = function(event) {
             const files = event.target.files;
             if (!files.length) {
@@ -968,13 +731,13 @@ body {
                     const base64String = e.target.result.split(',')[1];
                     const mimeType = file.type;
                     const dataUrl = e.target.result;
-
+                    
                     uploadedImages.push({
                         data: base64String,
                         mimeType: mimeType,
                         dataUrl: dataUrl // Store Data URL for previewing
                     });
-
+                    
                     // Re-render the previews every time a file loads
                     if (uploadedImages.length === files.length) {
                         renderPreviews();
@@ -982,7 +745,7 @@ body {
                 };
                 reader.readAsDataURL(file);
             });
-
+            
             // If the user selected files but some were invalid, ensure we render what's valid.
             // A short delay helps ensure all FileReader async operations complete if the list is small.
             setTimeout(renderPreviews, 100); 
@@ -992,9 +755,9 @@ body {
         // --- Geolocation Functionality ---
 
         function updateLocationStatus(state, message = '') {
-
+            
             locationStatusSpan.className = 'text-xs p-1 px-2 rounded-lg transition-all border font-medium'; // Reset classes
-
+            
             if (state === 'acquiring') {
                 locationStatusSpan.textContent = 'Loc: Acquiring...';
                 locationStatusSpan.classList.add('location-active', 'bg-orange-100', 'dark:bg-orange-700', 'text-orange-700', 'dark:text-orange-300', 'border-orange-400');
@@ -1047,7 +810,7 @@ body {
 
 
         // --- Text-to-Speech (TTS) Implementation ---
-
+        
         function base64ToArrayBuffer(base64) {
             const binaryString = atob(base64);
             const len = binaryString.length;
@@ -1075,7 +838,7 @@ body {
             writeString(view, offset, 'RIFF'); offset += 4;
             view.setUint32(offset, 36 + pcm16.length * bytesPerSample, true); offset += 4;
             writeString(view, offset, 'WAVE'); offset += 4;
-
+            
             // fmt chunk
             writeString(view, offset, 'fmt '); offset += 4;
             view.setUint32(offset, 16, true); offset += 4;
@@ -1085,7 +848,7 @@ body {
             view.setUint32(offset, sampleRate * numChannels * bytesPerSample, true); offset += 4; 
             view.setUint16(offset, numChannels * bytesPerSample, true); offset += 2; 
             view.setUint16(offset, bytesPerSample * 8, true); offset += 2; 
-
+            
             // data chunk
             writeString(view, offset, 'data'); offset += 4;
             view.setUint32(offset, pcm16.length * bytesPerSample, true); offset += 4;
@@ -1097,18 +860,18 @@ body {
 
             return new Blob([view], { type: 'audio/wav' });
         }
-
+        
         function stopAudioPlayback() {
             if (currentAudio) {
                 currentAudio.pause();
                 currentAudio.currentTime = 0; // Reset audio position
-
+                
                 if (currentAudioButton) {
                     currentAudioButton.disabled = false;
                     currentAudioButton.classList.remove('audio-playing');
                     currentAudioButton.innerHTML = `<svg id="speaker-icon" class="w-full h-full" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L6 9H2v6h4l5 4V5zm7.5 7c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM16 5.86v12.28c2.19-.85 3.5-3.05 3.5-5.14s-1.31-4.29-3.5-5.14z"></path></svg>`;
                 }
-
+                
                 currentAudio = null;
                 currentAudioButton = null;
             }
@@ -1119,10 +882,10 @@ body {
          */
         async function speakText(text, button, autoPlay = false) {
             const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${apiKey}`;
-
+            
             // If another audio is playing, stop it first
             stopAudioPlayback();
-
+            
             // Set current state
             currentAudioButton = button;
             button.disabled = true;
@@ -1153,7 +916,7 @@ body {
                     body: JSON.stringify(payload)
                 });
                 const result = await response.json();
-
+                
                 const part = result?.candidates?.[0]?.content?.parts?.[0];
                 const audioData = part?.inlineData?.data;
                 const mimeType = part?.inlineData?.mimeType;
@@ -1165,18 +928,18 @@ body {
                     const pcmDataBuffer = base64ToArrayBuffer(audioData);
                     const pcm16 = new Int16Array(pcmDataBuffer);
                     const wavBlob = pcmToWav(pcm16, sampleRate);
-
+                    
                     const audioUrl = URL.createObjectURL(wavBlob);
                     const audio = new Audio(audioUrl);
                     currentAudio = audio; // Track this audio instance
-
+                    
                     // Update button UI to stop/pause icon and pulsing
                     button.classList.add('audio-playing');
                     button.innerHTML = `<svg class="w-full h-full" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`; // Pause/Stop Icon
 
                     // Re-enable the button so user can stop it
                     button.disabled = false;
-
+                    
                     audio.onended = () => {
                         stopAudioPlayback(); // Reset to speaker icon
                     };
@@ -1185,7 +948,7 @@ body {
                         displayError("Audio chalaane mein dikkat aayi (Issue occurred playing audio), huzoor. Maafi chahta hoon.");
                         stopAudioPlayback();
                     };
-
+                    
                     audio.play().catch(e => {
                         console.error("Audio playback failed (usually due to user interaction requirement):", e);
                         // If autoplay fails, revert to ready state and keep the speaker button
@@ -1200,18 +963,18 @@ body {
                     displayError("TTS API se sahi audio data nahi aaya (Did not receive proper audio data from TTS API). Kripya dobara try karein, huzoor.");
                     stopAudioPlayback();
                 }
-            } //catch (error) {
-               // console.error("TTS API Error during speech generation:", error);
-               // displayError("TTS service mein koi gadbad ho gayi (Something went wrong in TTS service). Kripya network check karein, sir.");
-                //stopAudioPlayback();
-        //    }
+            } catch (error) {
+                console.error("TTS API Error during speech generation:", error);
+                displayError("TTS service mein koi gadbad ho gayi (Something went wrong in TTS service). Kripya network check karein, sir.");
+                stopAudioPlayback();
+            }
         }
-
+        
         // This function is called by the button click
         window.handleAudioPlayback = function(button) {
             // Get the full text from the parent bubble's data attribute
             const text = button.closest('.model-bubble').dataset.fullText;
-
+            
             if (currentAudio && currentAudioButton === button) {
                 // If the same audio is playing, stop it (correction/stop functionality)
                 stopAudioPlayback();
@@ -1220,7 +983,7 @@ body {
                 speakText(text, button, true);
             }
         }
-
+        
         // Function to be called after the model's text is fully displayed (INSTANTLY now)
         function startAutoAudio(button) {
             // Find the full text (it should be set in the saveMessage step)
@@ -1234,7 +997,7 @@ body {
                 speakText(cleanText, button, true);
             }
         }
-
+        
         // Helper function to add the audio button (used for initial message)
         function addAudioButtonToInitialMessage(text, wrapper) {
             const audioButton = document.createElement('button');
@@ -1256,7 +1019,7 @@ body {
             stopAudioPlayback();
             if (typingInterval) clearInterval(typingInterval); // Stop any ongoing typing
 
-
+            
             // --- UI State: User Message & Loading ---
             userInput.value = ''; 
             sendBtn.disabled = true;
@@ -1266,7 +1029,7 @@ body {
 
             let promptText = userQuery;
             const hasImages = uploadedImages.length > 0;
-
+            
             if (userLocation) {
                 // Location information ko Hindi mein shamil karein
                 promptText = `User Location: [${userLocation.lat.toFixed(6)}, ${userLocation.lon.toFixed(6)}]. Yeh location user ne di hai. Sawal: ${userQuery}`;
@@ -1285,9 +1048,9 @@ body {
             // 1. Save and display the user's message immediately
             const userDisplayText = userQuery || (hasImages ? `Multiple Images Attached (${uploadedImages.length})` : "Image attached.");
             createMessageBubble('user', userDisplayText, currentImagesDataUrls);
-
+            
             await saveMessage('user', userQuery, currentImagesForSave);
-
+            
             // Clear location and image state immediately after using them
             userLocation = null;
             updateLocationStatus('off');
@@ -1301,7 +1064,7 @@ body {
             if (textPart) {
                 textPart.text = promptText; 
             }
-
+            
             const limitedContentsForApi = contentsForApi.slice(-10); 
 
             const payload = {
@@ -1324,32 +1087,32 @@ body {
                 // Get the model's response text
                 const response = await fetchWithRetry(API_URL, options);
                 const result = await response.json();
-
+                
                 modelResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
                 if (!modelResponseText) {
                     throw new Error("Model ne koi jawab nahi diya (Model returned an empty reply). Maafi chahta hoon, huzoor.");
                 }
-
+                
                 const cleanResponseText = stripMarkdown(modelResponseText);
-
+                
                 // Hide indicator, update status
                 typingIndicator.classList.add('hidden'); 
                 systemStatusSpan.textContent = "Status: Jawab likh raha hoon (Writing reply)...";
 
                 // Create the model bubble but with EMPTY text, so typing can start
                 const {textSpan, audioButton} = createMessageBubble('model', '');
-
+                
                 // Set the full text on the bubble wrapper immediately for the TTS function later
                 const modelBubble = textSpan.closest('.model-bubble');
                 modelBubble.dataset.fullText = cleanResponseText; 
-
+                
                 // 3. Save the final message to history
                 // This happens before typing starts, as the text is finalized now
                 await saveMessage('model', cleanResponseText);
-
+                
                 // 4. *** Start the Typing Animation (and chain the audio) ***
-
+                
                 // Define callback to start audio after typing is done
                 const audioCallback = () => {
                     systemStatusSpan.textContent = "Status: Awaaz shuru (Audio starting)...";
@@ -1365,7 +1128,7 @@ body {
                 console.error("API Error:", error);
                 const errorMsg = error.message.includes("API connection error") ? error.message : `API request failed: ${error.message}`;
                 displayError(errorMsg); 
-
+                
                 // If failed before typing, update status
                 typingIndicator.classList.add('hidden');
                 systemStatusSpan.textContent = "Status: Error";
@@ -1374,32 +1137,32 @@ body {
                 sendBtn.disabled = false;
                 sendBtn.classList.remove('opacity-70', 'cursor-not-allowed');
                 userInput.focus();
-
+                
                 // If typing is still active (which shouldn't happen here if API failed immediately), we clear it.
                 // Final status update will happen after audio starts in success case.
             }
         }
-
+        
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             initializeTheme();
             updateLocationStatus('off');
-
+            
             // Re-wrap initial message for correct alignment
             const initialMessageContainer = document.createElement('div');
             initialMessageContainer.className = 'model-bubble-container';
             initialMessageContainer.appendChild(initialMessageBox);
             chatHistoryDiv.appendChild(initialMessageContainer);
-
+            
             // Add audio button to initial message
             const initialText = document.getElementById('initial-message').textContent;
             const initialWrapper = initialMessageBox.querySelector('.model-bubble');
-
+            
             addAudioButtonToInitialMessage(initialText, initialWrapper);
-
+            
             // Ensure the initial message text span takes up necessary space
             document.getElementById('initial-message').classList.add('flex-grow');
-
+            
             // Enable the initial message audio button
             const initialAudioButton = initialMessageBox.querySelector('.audio-btn');
             if (initialAudioButton) {
