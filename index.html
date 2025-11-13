@@ -810,215 +810,114 @@
         }
 
 
-        // --- Text-to-Speech (TTS) Implementation ---
-        
-        function base64ToArrayBuffer(base64) {
-            const binaryString = atob(base64);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return bytes.buffer;
-        }
+// ---------------------------------------------
+// TTS Configuration and Helper Function
+// ---------------------------------------------
 
-        function writeString(view, offset, string) {
-            for (let i = 0; i < string.length; i++) {
-                view.setUint8(offset + i, string.charCodeAt(i));
-            }
-        }
+const apiKey = "YOUR_GOOGLE_API_KEY"; // Replace with your actual API key
+const TTS_MODEL = "tts-1"; // Or use "tts-1-hq" for higher quality
 
-        function pcmToWav(pcm16, sampleRate) {
-            const numChannels = 1;
-            const bytesPerSample = 2; 
-            const buffer = new ArrayBuffer(44 + pcm16.length * bytesPerSample);
-            const view = new DataView(buffer);
-            let offset = 0;
+// Function to call Google TTS and play response audio
+async function speakText(text) {
+  try {
+    // 1. Validation
+    if (!text || text.trim().length === 0) {
+      console.error("TTS Error: Empty text input");
+      return;
+    }
 
-            // RIFF chunk
-            writeString(view, offset, 'RIFF'); offset += 4;
-            view.setUint32(offset, 36 + pcm16.length * bytesPerSample, true); offset += 4;
-            writeString(view, offset, 'WAVE'); offset += 4;
-            
-            // fmt chunk
-            writeString(view, offset, 'fmt '); offset += 4;
-            view.setUint32(offset, 16, true); offset += 4;
-            view.setUint16(offset, 1, true); offset += 2; 
-            view.setUint16(offset, numChannels, true); offset += 2;
-            view.setUint32(offset, sampleRate, true); offset += 4;
-            view.setUint32(offset, sampleRate * numChannels * bytesPerSample, true); offset += 4; 
-            view.setUint16(offset, numChannels * bytesPerSample, true); offset += 2; 
-            view.setUint16(offset, bytesPerSample * 8, true); offset += 2; 
-            
-            // data chunk
-            writeString(view, offset, 'data'); offset += 4;
-            view.setUint32(offset, pcm16.length * bytesPerSample, true); offset += 4;
+    // 2. API Endpoint
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateAudio?key=${apiKey}`;
 
-            // Write PCM data
-            for (let i = 0; i < pcm16.length; i++, offset += 2) {
-                view.setInt16(offset, pcm16[i], true);
-            }
+    // 3. Payload Configuration
+    const payload = {
+      model: `models/${TTS_MODEL}`,
+      input: text,
+      voice: "Orus",          // Choose "Orus" (Male) or "Aditi" (Female)
+      languageCode: "en-IN"   // English with Indian accent
+    };
 
-            return new Blob([view], { type: 'audio/wav' });
-        }
-        
-        function stopAudioPlayback() {
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0; // Reset audio position
-                
-                if (currentAudioButton) {
-                    currentAudioButton.disabled = false;
-                    currentAudioButton.classList.remove('audio-playing');
-                    currentAudioButton.innerHTML = `<svg id="speaker-icon" class="w-full h-full" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L6 9H2v6h4l5 4V5zm7.5 7c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM16 5.86v12.28c2.19-.85 3.5-3.05 3.5-5.14s-1.31-4.29-3.5-5.14z"></path></svg>`;
-                }
-                
-                currentAudio = null;
-                currentAudioButton = null;
-            }
-        }
+    // 4. API Request
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-        /**
-         * Converts text to speech and plays the audio via a user interaction (button click) or automatically.
-         */
-        async function speakText(text, button, autoPlay = false) {
-            const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${apiKey}`;
-            
-            // If another audio is playing, stop it first
-            stopAudioPlayback();
-            
-            // Set current state
-            currentAudioButton = button;
-            button.disabled = true;
-            button.innerHTML = `<svg class="w-full h-full animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m15.356-2H15a.5.5 0 00-.5.5V11m5.356 2h-4.721c-1.399 0-2.5-1.101-2.5-2.5v-1c0-1.399 1.101-2.5 2.5-2.5H19m-4 12v-5h.582m-15.356 2A8.001 8.001 0 0119.418 15m-15.356 2H9a.5.5 0 00.5-.5V13m-5.356 2h4.721c1.399 0 2.5 1.101 2.5 2.5v1c0 1.399-1.101 2.5-2.5 2.5H5"></path></svg>`;
+    const result = await response.json();
 
-            const payload = {
-                contents: [{
-                    // Updated TTS Instruction for clear, Indian accented Hindi/Hinglish
-                    parts: [{ text: `You are a polite and professional Indian assistant. Please speak this text with an Indian accent and proper pronunciation: ${text}` }]
-                }],
-                generationConfig: {
-                    responseModalities: ["AUDIO"],
-                    speechConfig: {
-                        voiceConfig: {
-                            // CHANGED VOICE FROM 'Kore' (Female) to 'Orus' (Male)
-                            prebuiltVoiceConfig: { voiceName: "Orus" } 
-                        },
-                        languageCode: "en-IN"
-                    }
-                },
-                model: TTS_MODEL
-            };
+    // 5. Extract and Play Audio
+    const audioData = result?.audio?.data;
+    const mimeType = result?.audio?.mimeType || "audio/mp3";
 
-            try {
-                const response = await fetchWithRetry(TTS_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                
-                const part = result?.candidates?.[0]?.content?.parts?.[0];
-                const audioData = part?.inlineData?.data;
-                const mimeType = part?.inlineData?.mimeType;
+    if (!audioData) {
+      console.error("No valid audio data received:", result);
+      showTTSModalError("Something went wrong in TTS service, sir.");
+      return;
+    }
 
-                if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
-                    const rateMatch = mimeType.match(/rate=(\d+)/);
-                    const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000; 
+    const audio = new Audio(`data:${mimeType};base64,${audioData}`);
+    await audio.play();
 
-                    const pcmDataBuffer = base64ToArrayBuffer(audioData);
-                    const pcm16 = new Int16Array(pcmDataBuffer);
-                    const wavBlob = pcmToWav(pcm16, sampleRate);
-                    
-                    const audioUrl = URL.createObjectURL(wavBlob);
-                    const audio = new Audio(audioUrl);
-                    currentAudio = audio; // Track this audio instance
-                    
-                    // Update button UI to stop/pause icon and pulsing
-                    button.classList.add('audio-playing');
-                    button.innerHTML = `<svg class="w-full h-full" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`; // Pause/Stop Icon
+    console.log("TTS: Audio played successfully.");
 
-                    // Re-enable the button so user can stop it
-                    button.disabled = false;
-                    
-                    audio.onended = () => {
-                        stopAudioPlayback(); // Reset to speaker icon
-                    };
-                    audio.onerror = (e) => {
-                        console.error("Audio playback error:", e);
-                        displayError("Issue occurred playing audio ");
-                        stopAudioPlayback();
-                    };
-                    
-                    audio.play().catch(e => {
-                        console.error("Audio playback failed :", e);
-                        // If autoplay fails, revert to ready state and keep the speaker button
-                        button.disabled = false;
-                        button.classList.remove('audio-playing');
-                        button.innerHTML = `<svg id="speaker-icon" class="w-full h-full" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L6 9H2v6h4l5 4V5zm7.5 7c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM16 5.86v12.28c2.19-.85 3.5-3.05 3.5-5.14s-1.31-4.29-3.5-5.14z"></path></svg>`;
-                        currentAudio = null;
-                        currentAudioButton = null;
-                    });
+  } catch (error) {
+    console.error("TTS Fetch Error:", error);
+    showTTSModalError("Something went wrong in TTS service, sir.");
+  }
+}
 
-                } else {
-                    displayError("Unable to retrieve valid audio data from the TTS API. Please retry in a moment.");
-                    stopAudioPlayback();
-                }
-            } catch (error) {
-                console.error("TTS API Error during speech generation:", error);
-                displayError("Something went wrong in TTS service.");
-                stopAudioPlayback();
-            }
-        }
-        
-        // This function is called by the button click
-        window.handleAudioPlayback = function(button) {
-            // Get the full text from the parent bubble's data attribute
-            const text = button.closest('.model-bubble').dataset.fullText;
-            
-            if (currentAudio && currentAudioButton === button) {
-                // If the same audio is playing, stop it (correction/stop functionality)
-                stopAudioPlayback();
-            } else {
-                // Otherwise, start or restart the audio
-                speakText(text, button, true);
-            }
-        }
-        
-        // Function to be called after the model's text is fully displayed (INSTANTLY now)
-        function startAutoAudio(button) {
-            // Find the full text (it should be set in the saveMessage step)
-            const text = button.closest('.model-bubble').dataset.fullText;
-            if (text) {
-                // Enable the button now that the text is complete
-                button.disabled = false;
-                systemStatusSpan.textContent = "Status: Ready (Audio playing)";
-                // Ensure text is stripped of any final markdown for clean TTS input
-                const cleanText = stripMarkdown(text);
-                speakText(cleanText, button, true);
-            }
-        }
-        
-        // Helper function to add the audio button (used for initial message)
-        function addAudioButtonToInitialMessage(text, wrapper) {
-            const audioButton = document.createElement('button');
-            audioButton.className = 'audio-btn w-6 h-6 flex-shrink-0';
-            audioButton.title = 'Suniye (Listen)';
-            audioButton.innerHTML = `<svg id="speaker-icon" class="w-full h-full" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L6 9H2v6h4l5 4V5zm7.5 7c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM16 5.86v12.28c2.19-.85 3.5-3.05 3.5-5.14s-1.31-4.29-3.5-5.14z"></path></svg>`;
-            audioButton.onclick = () => handleAudioPlayback(audioButton);
-            wrapper.appendChild(audioButton);
-            wrapper.dataset.fullText = text;
-        }
+// ---------------------------------------------
+// Error Modal Display Function
+// ---------------------------------------------
+function showTTSModalError(message) {
+  const modal = document.createElement("div");
+  modal.style.position = "fixed";
+  modal.style.top = "0";
+  modal.style.left = "0";
+  modal.style.width = "100%";
+  modal.style.height = "100%";
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
+  modal.style.background = "rgba(0,0,0,0.6)";
+  modal.style.zIndex = "9999";
 
-        // --- Main Send Message Function ---
+  modal.innerHTML = `
+    <div style="
+      background:#1a1a1a;
+      padding:25px;
+      border-radius:15px;
+      color:#fff;
+      text-align:center;
+      max-width:400px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.4);
+    ">
+      <h3 style="color:#ff4d4d;">System Error</h3>
+      <p>${message}</p>
+      <button id="ackBtn" style="
+        background:#e63946;
+        border:none;
+        color:white;
+        padding:10px 20px;
+        border-radius:8px;
+        margin-top:15px;
+        cursor:pointer;
+      ">Okay, understood</button>
+    </div>
+  `;
 
-        window.sendMessage = async function() {
-            const userQuery = userInput.value.trim();
-            if (!userQuery && uploadedImages.length === 0) return;
+  document.body.appendChild(modal);
 
-            // --- CRITICAL: Stop any currently playing audio immediately ---
-            stopAudioPlayback();
-            if (typingInterval) clearInterval(typingInterval); // Stop any ongoing typing
+  document.getElementById("ackBtn").addEventListener("click", () => {
+    document.body.removeChild(modal);
+  });
+}
+
+// ---------------------------------------------
+// Example usage
+// ---------------------------------------------
+// speakText("Hello, at your service. How may I assist you today, sir?");
 
             
             // --- UI State: User Message & Loading ---
