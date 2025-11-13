@@ -298,7 +298,7 @@
             <!-- Typing Indicator (Replaced by just Loading) -->
             <div id="typing-indicator" class="hidden my-2 model-bubble-container">
                 <div class="model-bubble text-sm text-gray-600 dark:text-gray-300 flex items-center p-3">
-                    <span class="mr-3 font-semibold">AI:az likh raha hai...</span>
+                    <span class="mr-3 font-semibold">Thinking</span>
                     <div class="flex">
                         <div class="typing-indicator-dot"></div>
                         <div class="typing-indicator-dot"></div>
@@ -310,7 +310,7 @@
 
         <!-- Image Preview Area -->
         <div id="image-preview-area" class="p-3 flex-shrink-0 bg-gray-50 dark:bg-gray-900 border-t dark:border-gray-700 hidden">
-            <p id="image-count-text" class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Image Attached (Ekdum Sahi): 0 Images</p>
+            <p id="image-count-text" class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Image Attached: 0 Images</p>
             <!-- Grid container for responsive image display -->
             <div id="uploaded-image-previews" class="image-preview-wrapper">
                 <!-- Image previews will be dynamically inserted here -->
@@ -355,7 +355,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm transform transition-all shadow-2xl">
                 <h3 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">System Error</h3>
                 <p id="error-message" class="text-gray-700 dark:text-gray-300 mb-4">An unknown error occurred. Please try again.</p>
-                <button class="w-full py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition" onclick="document.getElementById('error-modal').classList.add('hidden')">Theek Hai (Acknowledge)</button>
+                <button class="w-full py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition" onclick="document.getElementById('error-modal').classList.add('hidden')">Acknowledge</button>
             </div>
         </div>
         
@@ -661,7 +661,7 @@
             imageInput.value = ''; // Clear file input
             uploadedImagePreviewsDiv.innerHTML = '';
             imagePreviewArea.classList.add('hidden');
-            imageCountText.textContent = "Image Attached (Ekdum Sahi): 0 Images";
+            imageCountText.textContent = "Image Attached : 0 Images";
             userInput.focus();
         }
         
@@ -676,12 +676,12 @@
             
             if (uploadedImages.length === 0) {
                 imagePreviewArea.classList.add('hidden');
-                imageCountText.textContent = "Image Attached (Ekdum Sahi): 0 Images";
+                imageCountText.textContent = "Image Attached : 0 Images";
                 return;
             }
             
             imagePreviewArea.classList.remove('hidden');
-            imageCountText.textContent = `Image Attached (Ekdum Sahi): ${uploadedImages.length} Images`;
+            imageCountText.textContent = `Image Attached : ${uploadedImages.length} Images`;
 
             uploadedImages.forEach((image, index) => {
                 const previewItem = document.createElement('div');
@@ -1024,7 +1024,7 @@
             sendBtn.disabled = true;
             sendBtn.classList.add('opacity-70', 'cursor-not-allowed');
             typingIndicator.classList.remove('hidden'); 
-            systemStatusSpan.textContent = "Status: Soch raha hoon (Thinking), please wait...";
+            systemStatusSpan.textContent = "Status: Thinking, please wait...";
 
             let promptText = userQuery;
             const hasImages = uploadedImages.length > 0;
