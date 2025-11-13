@@ -944,7 +944,7 @@
                     };
                     audio.onerror = (e) => {
                         console.error("Audio playback error:", e);
-                        displayError("Audio chalaane mein dikkat aayi (Issue occurred playing audio), huzoor. Maafi chahta hoon.");
+                        displayError("Issue occurred playing audio ");
                         stopAudioPlayback();
                     };
                     
@@ -1031,11 +1031,11 @@
             
             if (userLocation) {
                 // Location information ko Hindi mein shamil karein
-                promptText = `User Location: [${userLocation.lat.toFixed(6)}, ${userLocation.lon.toFixed(6)}]. Yeh location user ne di hai. Sawal: ${userQuery}`;
+                promptText = `User Location: [${userLocation.lat.toFixed(6)}, ${userLocation.lon.toFixed(6)}]. Location provided by user. Ques: ${userQuery}`;
             } else if (hasImages && !userQuery) {
-                 promptText = "Multiple images attach ki gayi hain. Kripya inmein kya dikh raha hai, bataiye aur mera margdarshan (guidance) karein?";
+                 promptText = "Multiple images attached ,See the image what are you seeing in this, give guidance to me on this pic?";
             } else if (hasImages && userQuery) {
-                 promptText = `Sawalon par dhyan dete hue, in images ko analyze karein. Sawal: ${userQuery}`;
+                 promptText = `Please analyze these images carefully, keeping the questions in mind. Ques: ${userQuery}`;
             }
 
             const currentImagesForSave = uploadedImages.map(img => ({
@@ -1090,14 +1090,14 @@
                 modelResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
                 if (!modelResponseText) {
-                    throw new Error("Model ne koi jawab nahi diya (Model returned an empty reply). Maafi chahta hoon, huzoor.");
+                    throw new Error("Model returned an empty reply");
                 }
                 
                 const cleanResponseText = stripMarkdown(modelResponseText);
                 
                 // Hide indicator, update status
                 typingIndicator.classList.add('hidden'); 
-                systemStatusSpan.textContent = "Status: Jawab likh raha hoon (Writing reply)...";
+                systemStatusSpan.textContent = "Status: Writing reply...";
 
                 // Create the model bubble but with EMPTY text, so typing can start
                 const {textSpan, audioButton} = createMessageBubble('model', '');
