@@ -894,7 +894,7 @@
             const payload = {
                 contents: [{
                     // Updated TTS Instruction for clear, Indian accented Hindi/Hinglish
-                    parts: [{ text: `Aap ek professional, adabdaar Indian assistant hain. Please iss text ko Indian accent aur Hindi uchchaaran mein bolen: ${text}` }]
+                    parts: [{ text: `You are a polite and professional Indian assistant. Please speak this text with an Indian accent and proper pronunciation: ${text}` }]
                 }],
                 generationConfig: {
                     responseModalities: ["AUDIO"],
@@ -903,7 +903,7 @@
                             // CHANGED VOICE FROM 'Kore' (Female) to 'Orus' (Male)
                             prebuiltVoiceConfig: { voiceName: "Orus" } 
                         },
-                        languageCode: "hi-IN"
+                        languageCode: "en-IN"
                     }
                 },
                 model: TTS_MODEL
