@@ -3,386 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI:az - The Respectful Assistant</title>
-      <link rel="icon" type="image/png" href="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngegg.com%2Fen%2Fsearch%3Fq%3Dai&psig=AOvVaw1M6jROgEOv1B3OQQ34bMhA&ust=1763137078999000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCJCzn8zD75ADFQAAAAAdAAAAABAE">
-
+    <title>AI:az: TTS & Multi-Modal Chat</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Tone.js for typing sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
     <style>
-        /* Custom CSS for Inter font and clean aesthetics */
+        /* Custom CSS for Inter font and chat aesthetics */
         body {
             font-family: 'Inter', sans-serif;
-            /* Base styles for light mode: Warm Indian morning sun vibe */
-            background: linear-gradient(135deg, #fef9e7 0%, #fdf2e9 100%);
-            color: #1a202c; /* Dark Text */
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            margin: 0;
-            overflow: hidden; 
+            min-height: 100vh;
+            transition: background-color 0.4s;
+            /* LIGHT MODE: Outer Gray Theme (Gray-200) */
+            background-color: #e5e7eb; /* gray-200 */
         }
 
-        /* Dark Mode Overrides: Deep blue night sky */
+        /* Dark Mode Body Background */
         .dark body {
-            background: linear-gradient(135deg, #132a4e 0%, #0a1930 100%);
-            color: #f3f4f6; /* Light Text */
+            background-color: #1a202c; /* Deep slate gray */
         }
         
-        .app-container {
-            width: 100vw; 
-            height: 100vh; 
-            background-color: white;
-            border-radius: 0; 
-            box-shadow: none; 
-            /* Fix for iOS/Android keyboard pushing layout */
-            display: flex; /* Ensure it's a flex container */
-            flex-direction: column; /* Stack items vertically */
+        /* Main card background (The "Inner Box") */
+        .chat-card {
+            transition: background-color 0.4s;
+            border-radius: 1.5rem; /* More rounded card */
+            border-width: 2px; /* Ensure border is visible */
         }
         
-        .dark .app-container {
-            background-color: #1f2937; 
-        }
-
-        /* Chat History Scroll Area */
-        #chat-history {
-            flex-grow: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch; 
-            padding: 1.5rem; 
-            /* Important: Ensures chat history shrinks when input area grows (keyboard) */
-            min-height: 0; 
-        }
-
-        /* Message Bubbles - Light Mode: Desi style with a touch of saffron and green */
-        .model-bubble {
-            background-color: #ffe0b2; /* Light Saffron/Orange tone */
-            color: #795548; /* Warm Brown text */
-            font-size: 1.05rem; 
-            display: flex;
-            align-items: flex-end; /* Align contents to the bottom/right */
-        }
-        .user-bubble {
-            background-color: #4caf50; /* Green tone */
-            color: white;
-            font-size: 1.05rem;
-            text-align: left;
-        }
-
-        /* Message Bubbles - Dark Mode: High contrast */
-        .dark .model-bubble {
-            background-color: #3e2723; /* Deep Brown/Red tone */
-            color: #ffcc80; /* Light Saffron/Orange tone */
-        }
-        .dark .user-bubble {
-            background-color: #81c784; /* Lighter green for dark mode contrast */
-            color: #1a202c; 
+        /* Light Mode Card: Inner Gray Box, Blue Boundary */
+        .light .chat-card {
+            background-color: #f3f4f6; /* gray-100 */
+            border-color: #3b82f6; /* blue-500 (Blue Boundary) */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
         }
         
+        /* Dark Mode Card */
+        .dark .chat-card {
+            background-color: #1f2937; /* Darker than body for contrast */
+            border-color: #374151; 
+        }
+
+        .container {
+            max-width: 1000px;
+        }
+        
+        .chat-container {
+            height: 70vh;
+            max-height: 700px; 
+            min-height: 300px; 
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            /* LIGHT MODE: Inner Chat Area is Grey (gray-100/f3f4f6) */
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .dark .chat-container {
+            background-color: #111827; /* Darker background for bubbles */
+        }
+
+        /* --- Social Media Bubble Styling --- */
         .user-bubble, .model-bubble {
-            padding: 1rem 1.25rem;
+            padding: 0.7rem 1rem; /* Slightly larger padding */
+            border-radius: 1rem; /* Highly rounded */
             word-wrap: break-word; 
             overflow-wrap: break-word;
-            white-space: pre-wrap; 
-            max-width: 95%; /* Increased max-width for better use of space */
-            border-radius: 1.5rem 1.5rem 0.5rem 1.5rem; 
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease-in-out;
-            flex-direction: column;
-        }
-        .model-bubble {
-             border-radius: 1.5rem 1.5rem 1.5rem 0.5rem; 
-        }
-        
-        /* Updated Image Styling for multiple images */
-        .bubble-image {
-            max-height: 15rem; /* Slightly taller images in history */
-            width: 100%;
-            height: auto;
-            object-fit: contain;
-            border-radius: 0.75rem;
-            margin-bottom: 0.5rem; 
-            background-color: #fff; /* White background for visibility */
-            padding: 4px;
-        }
-        
-        /* Image Preview Wrapper Styling */
-        .image-preview-wrapper {
-            display: grid;
-            /* Responsive grid: 1 column on small screens, up to 4 on large */
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
-            gap: 1rem;
-            max-height: 200px; /* Limit height of the preview area */
-            overflow-y: auto;
-            padding-top: 0.5rem;
-        }
-        .preview-item {
-            position: relative;
-            background-color: #f0f0f0;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .preview-item img {
-            width: 100%;
-            height: 100px; /* Fixed height for consistent look */
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        .preview-item:hover img {
-            transform: scale(1.05);
-        }
-        .remove-image-btn-sm {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: rgba(255, 0, 0, 0.7);
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .remove-image-btn-sm:hover {
-            background-color: rgba(255, 0, 0, 1);
+            max-width: 85%; 
+            line-height: 1.4;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); /* Light social media shadow */
+            transition: background-color 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(0, 0, 0, 0.05); /* Subtle border for separation */
         }
 
-        /* Container Fix: Ensure containers correctly align the bubbles */
-        .user-bubble-container {
-            align-self: flex-end; 
-            display: flex; 
-            justify-content: flex-end;
+        /* *** REVISED LIGHT MODE BUBBLES ***
+        - User Bubble: Very Light Blue (Blue-100) with Dark Text (Gray-800)
+        - AI Bubble: Very Light Grey (Gray-100) with Dark Text (Gray-800)
+        */
+        .light .user-bubble {
+            background-color: #dbeafe; /* Blue-100 (Extremely Light Blue) */
+            color: #1f2937; /* Gray-800 (Dark Text for Contrast) */
+            border-radius: 1rem 1rem 0.25rem 1rem; /* Bubble tail bottom right */
+            margin-left: auto;
+            box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2); /* Accent shadow */
+            border-color: #93c5fd; /* Blue-300 border for definition */
         }
-        .model-bubble-container {
-            align-self: flex-start;
-            display: flex;
-            justify-content: flex-start;
-        }
-
-        /* Typing Indicator Styles */
-        .typing-indicator-dot {
-            width: 8px; 
-            height: 8px;
-            background-color: #ff9800; /* Orange dot */
-            border-radius: 50%;
-            margin: 0 3px;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-        .dark .typing-indicator-dot {
-             background-color: #ffb74d; 
-        }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1.0); }
-        }
-        .typing-indicator-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator-dot:nth-child(2) { animation-delay: -0.16s; }
-        
-        /* Location Status Glow (using a saffron color) */
-        .location-active {
-            animation: pulse-border 1.5s infinite;
-        }
-        @keyframes pulse-border {
-            0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); } /* Deep Orange glow */
-            70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+        .light .model-bubble {
+            background-color: #f3f4f6; /* Gray-100 (Very Light Neutral) */
+            color: #1f2937; /* Gray-800 (Dark Text for Contrast) */
+            border-radius: 1rem 1rem 1rem 0.25rem; /* Bubble tail bottom left */
+            margin-right: auto;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            border-color: #d1d5db; /* Gray-300 border for definition */
         }
         
-        /* Input Field Styling */
-        #user-input {
-            border-radius: 9999px; 
-            padding-left: 1.5rem;
-            background-color: #f9fafb;
-            border: 2px solid #d1d5db;
-            color: #1a202c; 
-        }
-        .dark #user-input {
-            background-color: #374151;
-            border-color: #4b5563;
-            color: #f3f4f6;
-        }
-        
-        /* Audio Button Styling */
-        .audio-btn {
-            margin-left: 0.75rem;
-            background: none;
+        /* Dark Mode Bubbles - Preserved */
+        .dark .user-bubble {
+            background-color: #06b6d4; /* Cyan-600 (Vibrant) */
+            color: white; 
+            border-radius: 1rem 1rem 0.25rem 1rem;
+            box-shadow: 0 1px 3px rgba(6, 182, 212, 0.4); 
             border: none;
-            padding: 0;
-            cursor: pointer;
-            transition: color 0.2s, transform 0.2s;
-            color: #795548; /* Match bubble text color */
         }
-        .dark .audio-btn {
-            color: #ffcc80;
+        .dark .model-bubble {
+            background-color: #374151; /* Darker gray for model bubble */
+            color: #e5e7eb; /* Light text */
+            border-radius: 1rem 1rem 1rem 0.25rem;
+            box-shadow: none;
+            border: none;
         }
-        .audio-btn:hover:not(:disabled) {
-            color: #ff9800;
-            transform: scale(1.1);
+        /* --- End Bubble Styling --- */
+
+
+        /* Loader/Typing indicator */
+        .loader {
+            border-top-color: #6366f1; /* Indigo-500 */
+            animation: spin 1s ease-in-out infinite;
         }
-        .audio-btn:disabled {
-            opacity: 0.5;
-            cursor: default;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
-        /* Pulsing Audio Icon when playing */
-        .audio-playing {
-            color: #ff9800 !important; /* Force orange color when playing */
-            animation: audio-pulse 1s infinite;
+        /* Cursor animation for typing effect */
+        .typing-cursor {
+            display: inline-block;
+            width: 1px;
+            height: 1.2em;
+            background-color: currentColor;
+            animation: blink 0.7s infinite;
+            margin-left: 2px;
         }
-        @keyframes audio-pulse {
-            0% { transform: scale(1.0); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.8; }
-            100% { transform: scale(1.0); opacity: 1; }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
-
     </style>
 </head>
-<body class="p-0 m-0 transition-colors duration-300">
+<body class="p-4 md:p-8 flex items-center justify-center text-gray-900 dark:text-gray-100">
 
-    <!-- Main App Container (Takes up the whole screen) -->
-    <div class="app-container flex flex-col transition-colors duration-300 overflow-hidden">
-        
-        <!-- Header Section -->
-        <header class="p-3 flex justify-between items-center border-b shadow-md flex-shrink-0 bg-white dark:bg-gray-900 dark:border-gray-700 transition-colors duration-300 flex-wrap">
-            
-            <!-- Group 1: Toggle, New Chat, Title -->
-            <div class="flex items-center space-x-2 flex-grow min-w-0">
+    <div class="container mx-auto w-full">
+        <header class="text-center mb-6 flex justify-between items-center flex-wrap gap-4">
+            <!-- Action Group: Theme, TTS & New Chat -->
+            <div class="flex space-x-2">
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="p-3 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-cyan-400 transition-colors shadow-md dark:shadow-none" onclick="toggleTheme()">
+                    <!-- Sun Icon (Light Mode) -->
+                    <svg id="sun-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <!-- Moon Icon (Dark Mode) -->
+                    <svg id="moon-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                </button>
                 
-                <!-- Theme Toggle Button -->
-                <button id="theme-toggle-btn" 
-                        class="p-2 rounded-full text-orange-500 dark:text-yellow-400 bg-orange-100 dark:bg-gray-700 transition-colors hover:bg-orange-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-orange-300 dark:focus:ring-yellow-500 shadow-md w-10 h-10 flex items-center justify-center flex-shrink-0" 
-                        onclick="toggleTheme()">
-                    <svg id="theme-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                <!-- TTS Toggle (New) -->
+                <button id="tts-toggle" class="p-3 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-orange-400 transition-colors shadow-md dark:shadow-none" onclick="toggleTts()">
+                    <!-- TTS Icon (Initial state set by JS) -->
+                    <svg id="tts-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Content replaced by JS -->
                     </svg>
                 </button>
-                
-                <!-- New Chat Button -->
+
+                <!-- New Chat Button (Clear History) -->
                 <button id="new-chat-btn" 
-                        class="p-2 rounded-full bg-red-600 text-white transition-colors hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-400 shadow-md w-10 h-10 flex items-center justify-center flex-shrink-0" 
-                        onclick="showConfirmClearHistory()">
+                        class="p-3 rounded-full bg-red-500 text-white transition-colors shadow-md hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-600" 
+                        onclick="clearHistory()">
                     <!-- Trash/New Icon -->
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.387 7.054a2 2 0 01-1.995 2.5l-2.673-.535a2 2 0 01-1.995-2.5L9.26 9m1.06 4.676l-1.06-1.06M12 6h6"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5v-1a1 1 0 011-1h4a1 1 0 011 1v1M5 7h14a1 1 0 011 1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8a1 1 0 011-1z"></path></svg>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.387 7.054a2 2 0 01-1.995 2.5l-2.673-.535a2 2 0 01-1.995-2.5L9.26 9m1.06 4.676l-1.06-1.06M12 6h6m-6 0V4m-6 0h6"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5v-1a1 1 0 011-1h4a1 1 0 011 1v1M5 7h14a1 1 0 011 1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8a1 1 0 011-1z"></path></svg>
                 </button>
-                
-                <!-- AI:az Title (Renamed and styled with Indian flag colors) -->
-                <h1 class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-green-600 tracking-tight ml-2 truncate mr-auto">
-                    AI:az
-                </h1>
             </div>
             
-            <!-- Group 2: Status Badge & Location (Consolidated) -->
-            <div class="flex items-center space-x-2 text-right flex-shrink-0 mt-1 sm:mt-0"> 
-                <span id="system-status" class="text-xs p-1 px-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-300 font-semibold">Status: Ready</span>
-                <span id="location-status" class="text-xs p-1 px-2 rounded-lg transition-all border text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600 font-medium">
-                    Loc: Off
-                </span>
-            </div>
+            <!-- Gradient Title -->
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-indigo-600 tracking-wider flex-grow text-center min-w-[200px] dark:from-cyan-400 dark:to-indigo-400">AI:az</h1>
+            
+            <!-- System Status -->
+            <!-- Ensures high contrast in light mode -->
+            <span id="system-status" class="text-xs sm:text-sm text-gray-700 dark:text-gray-400 p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 transition-colors">Status: Ready</span>
+
         </header>
 
-        <!-- Chat History Display -->
-        <div id="chat-history" class="chat-history-bg flex flex-col space-y-4 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
-            <!-- Initial Welcome Message -->
-            <div id="initial-message-box" class="model-bubble-container">
-                <div class="model-bubble p-3 shadow-md flex items-end">
-                    <span id="initial-message" class="flex-grow">Hey, I am AI:az , How can I help you?</span>
+        <!-- Main Chat Box: Floating Panel Effect (The "Inner Box") -->
+        <div class="chat-card p-3 md:p-6 rounded-xl shadow-xl flex flex-col transition-colors w-full">
+            <!-- Chat History Display -->
+            <div id="chat-history" class="chat-container overflow-y-auto p-2 md:p-3 rounded-xl flex flex-col space-y-3 transition-colors">
+                <!-- Initial Welcome Message (Removed 'hidden' on load, controlled by JS in clearHistory) -->
+                <div id="initial-message-box" class="model-bubble p-3">
+                    <span id="initial-message">Hello! I am AI:az, a local assistant here to help you. I now support multi-file upload, text-to-speech, and location awareness. Please toggle the volume icon to turn the voice reply on or off!</span>
                 </div>
             </div>
-            
-            <!-- Typing Indicator (Replaced by just Loading) -->
-            <div id="typing-indicator" class="hidden my-2 model-bubble-container">
-                <div class="model-bubble text-sm text-gray-600 dark:text-gray-300 flex items-center p-3">
-                    <span class="mr-3 font-semibold">Thinking</span>
-                    <div class="flex">
-                        <div class="typing-indicator-dot"></div>
-                        <div class="typing-indicator-dot"></div>
-                        <div class="typing-indicator-dot"></div>
-                    </div>
+
+            <!-- File Preview Area -->
+            <div id="file-preview-area" class="mt-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hidden transition-colors">
+                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Attached Files (Max 5 will be processed):</p>
+                <div id="file-list" class="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                    <!-- Files will be listed here -->
                 </div>
+                <button onclick="clearFiles()" class="text-sm text-red-500 hover:text-red-600 mt-2">Remove All Files</button>
             </div>
-        </div>
 
-        <!-- Image Preview Area -->
-        <div id="image-preview-area" class="p-3 flex-shrink-0 bg-gray-50 dark:bg-gray-900 border-t dark:border-gray-700 hidden">
-            <p id="image-count-text" class="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Image Attached: 0 Images</p>
-            <!-- Grid container for responsive image display -->
-            <div id="uploaded-image-previews" class="image-preview-wrapper">
-                <!-- Image previews will be dynamically inserted here -->
+
+            <!-- Chat Input Section (Responsive Flex Layout) -->
+            <div class="flex space-x-2 sm:space-x-3 mt-4">
+                
+                <!-- Location Button -->
+                <button id="location-btn" 
+                        class="flex-shrink-0 p-3 sm:p-4 bg-gray-500 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-gray-300 transition-all shadow-md flex items-center justify-center hover:bg-gray-600 w-12 sm:w-14"
+                        onclick="getLocation()">
+                    <!-- Map Pin Icon -->
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+                
+                <!-- File Upload Button (Paperclip Icon) -->
+                <button id="file-upload-btn" 
+                        class="flex-shrink-0 p-3 sm:p-4 bg-indigo-600 text-white font-semibold rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-500 transition-all shadow-md flex items-center justify-center hover:bg-indigo-700 w-12 sm:w-14"
+                        onclick="document.getElementById('file-input').click()">
+                    <!-- Paperclip Icon -->
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.57 6.57a4.5 4.5 0 01-6.364-6.364l6.57-6.57a6 6 0 018.485 8.485l-6.57 6.57a3 3 0 01-4.243-4.243l6.57-6.57"></path></svg>
+                </button>
+                
+                <!-- Hidden File Input (Accepts multiple, any type) -->
+                <input type="file" id="file-input" accept="*/*" multiple class="hidden" onchange="previewFiles(event)">
+
+
+                <input type="text" id="user-input" placeholder="Message AyazAI..."
+                       class="flex-grow p-3 sm:p-4 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-800 dark:text-gray-100 transition-colors placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
+                       onkeypress="if(event.key === 'Enter') sendMessage()">
+                
+                <!-- Send Button: Accent Color -->
+                <button id="send-btn" 
+                        class="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-70 transition-all shadow-lg flex items-center justify-center w-12 sm:w-16"
+                        onclick="sendMessage()">
+                    <!-- Send Arrow Icon -->
+                    <svg class="w-6 h-6 transform rotate-90" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 00.149 1.485.584.584 0 00.413.155H18.232a.584.584 0 00.413-.155 1 1 0 00.149-1.485l-7-14z"></path></svg>
+                </button>
             </div>
-        </div>
-
-
-        <!-- Chat Input Section -->
-        <div class="p-2 border-t flex space-x-2 flex-shrink-0 bg-white dark:bg-gray-900 dark:border-gray-700 transition-colors duration-300 shadow-inner">
             
-            <!-- Location Button (Map Icon) -->
-            <button id="location-btn" 
-                    class="p-2 bg-orange-500 text-white rounded-full focus:outline-none focus:ring-4 focus:ring-orange-300 transition-all hover:bg-orange-600 shadow-lg flex items-center justify-center w-12 h-12 flex-shrink-0 hover:scale-105" 
-                    onclick="getLocation()">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243m.707-8.243a7 7 0 119.899 9.899L12 20.908l-5.303-5.303a7 7 0 019.899-9.899z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </button>
-            
-            <!-- Image Upload Button (Now handles multiple selection) -->
-            <button id="image-upload-btn" 
-                    class="p-2 bg-green-500 text-white rounded-full focus:outline-none focus:ring-4 focus:ring-green-300 transition-all hover:bg-green-600 shadow-lg flex items-center justify-center w-12 h-12 flex-shrink-0 hover:scale-105"
-                    onclick="document.getElementById('image-input').click()">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 16m-1-4V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2v-3"></path></svg>
-            </button>
-            
-            <!-- Hidden File Input (Modified to allow multiple files) -->
-            <input type="file" id="image-input" accept="image/*" class="hidden" multiple onchange="previewImages(event)">
-
-            <input type="text" id="user-input" placeholder="Aapka sawaal kya hai, huzoor?"
-                    class="flex-grow p-3 border rounded-full focus:ring-orange-500 focus:border-orange-500 transition-colors placeholder-gray-400 text-base dark:text-white"
-                    onkeypress="if(event.key === 'Enter') sendMessage()">
-            
-            <!-- Send Button -->
-            <button id="send-btn" 
-                    class="p-2 bg-gradient-to-r from-orange-500 to-green-600 text-white rounded-full hover:from-orange-600 hover:to-green-700 focus:outline-none focus:ring-4 focus:ring-orange-300 transition-all shadow-xl w-12 h-12 flex items-center justify-center flex-shrink-0 hover:scale-105"
-                    onclick="sendMessage()">
-                <svg id="button-icon" class="w-6 h-6 rotate-90" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.25a.75.75 0 01.75.75v16.19l3.72-3.72a.75.75 0 111.06 1.06l-5 5a.75.75 0 01-1.06 0l-5-5a.75.75 0 111.06-1.06l3.72 3.72V3a.75.75 0 01.75-.75z"></path></svg>
-            </button>
-        </div>
-        
-        <!-- Custom Modal for Errors -->
-        <div id="error-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm transform transition-all shadow-2xl">
-                <h3 class="text-xl font-bold text-red-600 dark:text-red-400 mb-3">System Error</h3>
-                <p id="error-message" class="text-gray-700 dark:text-gray-300 mb-4">An unknown error occurred. Please try again.</p>
-                <button class="w-full py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition" onclick="document.getElementById('error-modal').classList.add('hidden')">Acknowledge</button>
-            </div>
-        </div>
-        
-        <!-- Custom Modal for Confirmation (New Chat) -->
-        <div id="confirm-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm transform transition-all shadow-2xl">
-                <h3 class="text-xl font-bold text-green-600 dark:text-green-400 mb-3">Confirm New Chat</h3>
-                <p class="text-gray-700 dark:text-gray-300 mb-6">Are you sure you want to clear the history? All our chat will be permanently deleted. Kindly confirm.</p>
-                <div class="flex justify-end space-x-3">
-                    <button class="py-2 px-4 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-400 dark:hover:bg-gray-500 transition" onclick="document.getElementById('confirm-modal').classList.add('hidden')">Cancel</button>
-                    <button class="py-2 px-4 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition" onclick="performClearHistory()">Clear History</button>
+            <!-- Custom Modal for Errors -->
+            <div id="error-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
+                <div class="bg-white dark:bg-gray-700 rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl dark:shadow-red-600/50">
+                    <h3 class="text-xl font-bold text-red-600 mb-3 dark:text-red-400">Error: System Alert</h3>
+                    <p id="error-message" class="text-gray-700 mb-4 dark:text-gray-200">An unknown error occurred.</p>
+                    <button class="w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700" onclick="document.getElementById('error-modal').classList.add('hidden')">Acknowledge</button>
                 </div>
             </div>
         </div>
-        
-        <!-- Location Permission Modal -->
-        <div id="permission-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm transform transition-all shadow-2xl">
-                <h3 class="text-xl font-bold text-orange-600 dark:text-orange-400 mb-3">Location Access Required</h3>
-                <p id="permission-message" class="text-gray-700 dark:text-gray-300 mb-4">Location access was denied. We require this to provide location-aware results.</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">**To fix it:** Please go to your browser's settings for this page and change the Location permission to **"Allow"**. Then press the map button again.</p>
-                <button class="w-full py-3 bg-orange-600 text-white font-semibold rounded-xl hover:bg-orange-700 transition" onclick="document.getElementById('permission-modal').classList.add('hidden')">Understood</button>
-            </div>
-        </div>
-
     </div>
 
     <script type="module">
@@ -391,82 +250,222 @@
 
         // --- Global State ---
         let userLocation = null; 
-        // Changed to array to hold multiple image objects
-        let uploadedImages = []; 
+        let uploadedFiles = []; 
         let chatHistory = []; 
-        let currentAudio = null; // To track currently playing audio instance
-        let currentAudioButton = null; // To track the button associated with currentAudio
-        let typingInterval = null; // To track the typing animation interval
         
         // --- DOM Elements ---
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
-        const locationStatusSpan = document.getElementById('location-status'); 
+        const locationBtn = document.getElementById('location-btn'); 
         const chatHistoryDiv = document.getElementById('chat-history');
-        const typingIndicator = document.getElementById('typing-indicator'); 
         const errorModal = document.getElementById('error-modal');
         const errorMessage = document.getElementById('error-message');
-        const confirmModal = document.getElementById('confirm-modal'); 
         const systemStatusSpan = document.getElementById('system-status');
         const initialMessageBox = document.getElementById('initial-message-box');
-        const imageInput = document.getElementById('image-input');
-        // const imagePreview = document.getElementById('image-preview'); // No longer needed
-        const imagePreviewArea = document.getElementById('image-preview-area');
-        const uploadedImagePreviewsDiv = document.getElementById('uploaded-image-previews');
-        const imageCountText = document.getElementById('image-count-text');
-        const permissionModal = document.getElementById('permission-modal'); 
-        const htmlElement = document.documentElement;
-        const themeIcon = document.getElementById('theme-icon');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+        const fileInput = document.getElementById('file-input');
+        const filePreviewArea = document.getElementById('file-preview-area');
+        const fileListDiv = document.getElementById('file-list');
+        const ttsIcon = document.getElementById('tts-icon');
+        
+        // --- TTS State ---
+        let isTtsEnabled = localStorage.getItem('ttsEnabled') === 'true';
 
         // --- API Constants ---
         const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
+        const TTS_MODEL_NAME = 'gemini-2.5-flash-preview-tts'; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
-        const TTS_MODEL = 'gemini-2.5-flash-preview-tts';
+        const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL_NAME}:generateContent?key=${apiKey}`; 
         
-        // UPDATED SYSTEM PROMPT: Ab sirf aasaan Hindi aur adab se baat karega (Writing in English letters)
-       const SYSTEM_PROMPT = "You are AI:az, a highly helpful, respectful, and professional assistant. You must always respond in simple and easy-to-understand English. Maintain a polite tone in your replies, using courteous expressions such as 'Sir', 'At your service', 'Yes', and 'Thank you'. Always use the search tool to provide the latest and most accurate information. Your responses should be in plain text only — without any bold or italic formatting.";
+        // --- SYSTEM PROMPT: Indian Context & No Markdown ---
+        const SYSTEM_PROMPT = "You are a friendly, concise, and helpful conversational assistant named AI:az, focused on providing service with a local Indian context and perspective. Maintain context and memory throughout the conversation. For any query requiring current or real-time information, you must use your search tool. You MUST respond in clear, plain text and AVOID using any Markdown formatting characters (like *, #, or `). Analyze and summarize any provided documents or images. Since this application runs locally without a database, your memory only lasts for this session.";
+        
+        const TYPING_DELAY = 20; // Milliseconds per character
+
+        // --- Audio Setup (Tone.js) ---
+        let synth = null;
+        let audioContextInitialized = false;
+
+        /**
+         * Initializes the Tone.js audio context and synth object for typing sound.
+         */
+        function initAudio() {
+            if (!audioContextInitialized) {
+                synth = new Tone.Synth({
+                    oscillator: { type: "sine" },
+                    envelope: {
+                        attack: 0.005,
+                        decay: 0.05,
+                        sustain: 0,
+                        release: 0.05
+                    },
+                    volume: -18
+                }).toDestination();
+                
+                Tone.start().then(() => {
+                    audioContextInitialized = true;
+                    console.log("Audio Context Started for typing sound.");
+                }).catch(e => console.error("Tone.js failed to start:", e));
+            }
+        }
+
+        /**
+         * Plays a short typing sound effect.
+         */
+        function playTypingSound() {
+            if (audioContextInitialized && Tone.context.state === 'running' && !isTtsEnabled) {
+                // Only play simple typing sound if TTS is NOT enabled
+                synth.triggerAttackRelease("G4", "64n"); 
+            }
+        }
+
+        // Attach audio initialization to user actions
+        document.addEventListener('DOMContentLoaded', () => {
+            const initOnce = () => initAudio();
+            sendBtn.addEventListener('click', initOnce, { once: true });
+            userInput.addEventListener('focus', initOnce, { once: true });
+        });
+        
+        // --- TTS Helper Functions (PCM to WAV) ---
+        
+        /**
+         * Converts a base64 string to an ArrayBuffer.
+         */
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        /**
+         * Converts signed 16-bit PCM audio data to a playable WAV format Blob.
+         */
+        function pcmToWav(pcm16, sampleRate) {
+            const numChannels = 1;
+            const bytesPerSample = 2;
+            const blockAlign = numChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const dataLength = pcm16.length * bytesPerSample;
+            const buffer = new ArrayBuffer(44 + dataLength);
+            const view = new DataView(buffer);
+            
+            function writeString(view, offset, str) {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
+                }
+            }
+
+            let offset = 0;
+
+            // RIFF chunk
+            writeString(view, offset, 'RIFF'); offset += 4;
+            view.setUint32(offset, 36 + dataLength, true); offset += 4;
+            writeString(view, offset, 'WAVE'); offset += 4;
+
+            // fmt chunk
+            writeString(view, offset, 'fmt '); offset += 4;
+            view.setUint32(offset, 16, true); offset += 4;      // ChunkSize (16 for PCM)
+            view.setUint16(offset, 1, true); offset += 2;       // AudioFormat (1 for PCM)
+            view.setUint16(offset, numChannels, true); offset += 2;
+            view.setUint32(offset, sampleRate, true); offset += 4;
+            view.setUint32(offset, byteRate, true); offset += 4;
+            view.setUint16(offset, blockAlign, true); offset += 2;
+            view.setUint16(offset, bytesPerSample * 8, true); offset += 2; // Bits per sample (16)
+
+            // data chunk
+            writeString(view, offset, 'data'); offset += 4;
+            view.setUint32(offset, dataLength, true); offset += 4;
+            
+            // Write PCM data
+            for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16[i], true); // Signed 16-bit little-endian
+            }
+
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
 
         // --- Theme Management ---
 
-        function setTheme(theme) {
+        /**
+         * Applies the selected theme and saves it to localStorage.
+         */
+        function applyTheme(theme) {
             if (theme === 'dark') {
-                htmlElement.classList.add('dark');
-                themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>`; // Moon icon
-                localStorage.setItem('theme', 'dark');
+                document.documentElement.classList.add('dark');
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
             } else {
-                htmlElement.classList.remove('dark');
-                themeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>`; // Sun icon
-                localStorage.setItem('theme', 'light');
+                document.documentElement.classList.remove('dark');
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
             }
+            localStorage.setItem('theme', theme);
         }
 
+        /**
+         * Toggles the current theme.
+         */
         window.toggleTheme = function() {
-            const currentTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            setTheme(currentTheme === 'light' ? 'dark' : 'light');
+            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            applyTheme(newTheme);
         }
-
-        function initializeTheme() {
-            const storedTheme = localStorage.getItem('theme');
-            if (storedTheme) {
-                setTheme(storedTheme);
-            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                setTheme('dark');
+        
+        // Load theme preference on startup
+        const preferredTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        applyTheme(preferredTheme);
+        
+        // --- TTS Toggle Management ---
+        
+        /**
+         * Updates the TTS icon to reflect the current state.
+         */
+        function updateTtsIcon() {
+            if (isTtsEnabled) {
+                // Volume On icon
+                ttsIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1V7a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0111 1v12a1 1 0 01-.293.707l-4.707 4.707z"></path>';
+                ttsIcon.parentNode.classList.remove('text-gray-400', 'bg-gray-200', 'dark:bg-gray-700');
+                ttsIcon.parentNode.classList.add('text-orange-500', 'bg-yellow-100', 'dark:bg-orange-900/50');
             } else {
-                setTheme('light');
+                // Volume Off/Mute icon (with a slash through)
+                ttsIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636M15 13.06L18 16m-4-6l3-3m-6 3H4a1 1 0 01-1-1V7a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0111 1v7.06"></path>';
+                ttsIcon.parentNode.classList.add('text-gray-400', 'bg-gray-200', 'dark:bg-gray-700');
+                ttsIcon.parentNode.classList.remove('text-orange-500', 'bg-yellow-100', 'dark:bg-orange-900/50');
             }
         }
+        
+        window.toggleTts = function() {
+            isTtsEnabled = !isTtsEnabled;
+            localStorage.setItem('ttsEnabled', isTtsEnabled);
+            updateTtsIcon();
+            if (isTtsEnabled) {
+                console.log("Text-to-Speech Enabled.");
+            } else {
+                console.log("Text-to-Speech Disabled.");
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', updateTtsIcon);
 
 
         // --- Utility Functions ---
 
+        /**
+         * Generic error handler to display a message in a custom modal.
+         */
         function displayError(message) {
             errorMessage.textContent = message;
             errorModal.classList.remove('hidden');
-            stopAudioPlayback(); // Stop audio if error occurs
+            systemStatusSpan.textContent = "Status: Error";
         }
 
         /**
-         * Robust fetch utility with exponential backoff for API calls.
+         * Helper function for fetching with exponential backoff retry.
          */
         async function fetchWithRetry(url, options, maxRetries = 3, delay = 1000) {
             for (let i = 0; i < maxRetries; i++) {
@@ -478,7 +477,7 @@
                         continue;
                     }
                     if (!response.ok) {
-                        const errorData = await response.json().catch(() => ({}));
+                        const errorData = await response.json();
                         throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
                     }
                     return response;
@@ -492,480 +491,368 @@
             }
         }
         
-        function stripMarkdown(text) {
-            // Remove code blocks, bolding, and italics.
-            let cleanedText = text.replace(/```.*?```/gs, ''); 
-            cleanedText = cleanedText.replace(/\*\*/g, ''); 
-            cleanedText = cleanedText.replace(/\*/g, '');  
-            cleanedText = cleanedText.replace(/_/g, '');  
-            
-            return cleanedText.trim();
-        }
-
         /**
-         * Creates and appends a new message bubble container.
-         * Note: Initial text is set to empty string to prepare for typing effect.
-         * imageUrls is an array of data URLs.
+         * Renders a new message bubble (and returns the text span for model messages).
+         * @param {string} text - The message content.
+         * @param {string} role - The role ('user' or 'model').
+         * @param {Array<object> | null} files - Array of files attached by the user.
+         * @returns {HTMLElement} The text <span> element.
          */
-        function createMessageBubble(role, text = '', imageUrls = []) {
-            if (chatHistory.length > 0 && !initialMessageBox.classList.contains('hidden')) {
+        function displayMessage(text, role, files = null) {
+            // FIX: Ensure initial message is hidden only if we are actually adding content
+            if (chatHistory.length > 0 || role === 'user' || text.trim() !== '') {
                 initialMessageBox.classList.add('hidden');
             }
-            
-            const messageContainer = document.createElement('div');
-            messageContainer.className = `${role}-bubble-container mb-4`;
 
             const messageWrapper = document.createElement('div');
-            // Add flex layout to manage the text content and the audio button side-by-side
-            messageWrapper.className = `${role}-bubble shadow-lg flex items-end`; 
-            
-            if (imageUrls.length > 0) {
-                // Create a container for multiple images in the chat history bubble
-                const imageGrid = document.createElement('div');
-                imageGrid.className = 'w-full grid gap-2 mb-2 p-1' + 
-                                       ' grid-cols-2 sm:grid-cols-3 md:grid-cols-4'; 
+            messageWrapper.className = `flex flex-col ${role === 'user' ? 'items-end' : 'items-start'} w-full`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `${role}-bubble`;
+
+            // Display attached files (if any)
+            if (files && files.length > 0) {
+                const fileContainer = document.createElement('div');
+                fileContainer.className = 'flex flex-wrap gap-2 mb-2 p-1 border-b border-gray-300 dark:border-gray-600';
                 
-                imageUrls.forEach(url => {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.className = 'bubble-image w-full h-auto max-h-40'; // Adjusted class for history view
-                    img.loading = 'lazy';
+                files.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'text-xs flex items-center bg-gray-200 dark:bg-gray-700 p-1 rounded-md';
                     
-                    const imgWrapper = document.createElement('div');
-                    imgWrapper.className = 'rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700';
-                    imgWrapper.appendChild(img);
-                    imageGrid.appendChild(imgWrapper);
+                    const icon = `<svg class="w-4 h-4 mr-1 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.57 6.57a4.5 4.5 0 01-6.364-6.364l6.57-6.57a6 6 0 018.485 8.485l-6.57 6.57a3 3 0 01-4.243-4.243l6.57-6.57"></path></svg>`;
+
+                    if (file.mimeType.startsWith('image/')) {
+                         // Display image preview
+                        const img = document.createElement('img');
+                        img.src = `data:${file.mimeType};base64,${file.data}`;
+                        img.className = 'max-h-24 max-w-full rounded-md object-contain mb-1 shadow-md';
+                        fileContainer.appendChild(img);
+                    } else {
+                        // Display generic file name
+                        fileItem.innerHTML = icon + `<span class="truncate">${file.name || file.mimeType}</span>`;
+                        fileContainer.appendChild(fileItem);
+                    }
                 });
-                
-                messageWrapper.appendChild(imageGrid);
+                bubble.appendChild(fileContainer);
             }
 
             const textSpan = document.createElement('span');
-            textSpan.textContent = text; // Initial text (empty for model reply)
-            textSpan.className = 'flex-grow'; // Allows text to take up most space
+            textSpan.textContent = text;
+            bubble.appendChild(textSpan);
             
-            // Only add the text span if it has content or if it's the user's side of an image message
-            if (text || role === 'user' || imageUrls.length === 0) {
-                 messageWrapper.appendChild(textSpan);
-            }
-            
-            // Add Audio Button only for Model replies
-            let audioButton = null;
-            if (role === 'model') {
-                audioButton = document.createElement('button');
-                audioButton.className = 'audio-btn w-6 h-6 flex-shrink-0';
-                audioButton.title = 'Suniye (Listen)';
-                audioButton.innerHTML = `<svg id="speaker-icon" class="w-full h-full" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11 5L6 9H2v6h4l5 4V5zm7.5 7c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM16 5.86v12.28c2.19-.85 3.5-3.05 3.5-5.14s-1.31-4.29-3.5-5.14z"></path></svg>`;
-                audioButton.onclick = () => handleAudioPlayback(audioButton);
-                audioButton.disabled = true; // Disable until typing is complete
-                messageWrapper.appendChild(audioButton);
-                
-                // Note: dataset.fullText is set in sendMessage for model replies
-            }
-
-            messageContainer.appendChild(messageWrapper);
-            chatHistoryDiv.appendChild(messageContainer);
+            messageWrapper.appendChild(bubble);
+            chatHistoryDiv.appendChild(messageWrapper);
             chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; 
             
-            return {textSpan, audioButton};
+            return textSpan;
         }
 
         /**
-         * Simulates typing effect for the model's response.
+         * Handles TTS synthesis and playback, then executes typewriter effect.
          */
-        function typeText(element, text, delay = 35, callback = null) {
-            let i = 0;
-            element.textContent = ''; 
+        async function typewriterEffect(targetElement, text, delay = TYPING_DELAY) {
             
-            if (typingInterval) {
-                clearInterval(typingInterval);
-            }
+            let audioPlayer = null;
 
-            typingInterval = setInterval(() => {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
-                    // Scroll chat history to keep up with the typing text
-                    chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
-                    i++;
-                } else {
-                    clearInterval(typingInterval);
-                    typingInterval = null;
-                    if (callback) {
-                        callback();
+            // 1. If TTS is enabled, fetch and start playing audio
+            if (isTtsEnabled) {
+                systemStatusSpan.textContent = "Status: Generating speech...";
+                try {
+                    const ttsPayload = {
+                        contents: [{ parts: [{ text }] }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: {
+                                // Use a clear, friendly voice
+                                voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } 
+                            }
+                        },
+                    };
+                    
+                    const ttsOptions = {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(ttsPayload)
+                    };
+
+                    const ttsResponse = await fetchWithRetry(TTS_API_URL, ttsOptions);
+                    const ttsResult = await ttsResponse.json();
+                    
+                    const part = ttsResult?.candidates?.[0]?.content?.parts?.[0];
+                    const audioData = part?.inlineData?.data;
+                    const mimeType = part?.inlineData?.mimeType;
+
+                    if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
+                        // Extract sample rate from mimeType (e.g., audio/L16;rate=24000)
+                        const rateMatch = mimeType.match(/rate=(\d+)/);
+                        const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+                        
+                        const pcmData = base64ToArrayBuffer(audioData);
+                        const pcm16 = new Int16Array(pcmData);
+                        const wavBlob = pcmToWav(pcm16, sampleRate);
+                        const audioUrl = URL.createObjectURL(wavBlob);
+                        
+                        audioPlayer = new Audio(audioUrl);
+                        audioPlayer.play().catch(e => console.error("Error playing audio:", e));
+                        
+                        systemStatusSpan.textContent = "Status: Speaking reply...";
+
+                    } else {
+                        console.warn("TTS generation failed or returned invalid format. Proceeding with typing only.");
                     }
+
+                } catch (e) {
+                    console.error("TTS API call failed:", e);
+                    systemStatusSpan.textContent = "Status: TTS Error, Typing only...";
                 }
-            }, delay);
+            }
+            
+            // 2. Start Typing Effect (runs even if TTS failed or is disabled)
+            const cursor = document.createElement('span');
+            cursor.className = 'typing-cursor';
+            targetElement.appendChild(cursor); 
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text.charAt(i);
+                targetElement.insertBefore(document.createTextNode(char), cursor);
+                
+                // Typing sound is handled inside playTypingSound which checks isTtsEnabled
+                playTypingSound(); 
+                
+                chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; 
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+            
+            targetElement.removeChild(cursor); 
+            
+            // 3. Clean up TTS resources
+            if (audioPlayer) {
+                // Ensure the status updates after the response is fully displayed
+                audioPlayer.onended = () => {
+                     // Only restore 'Ready' if no other process is running
+                    if (systemStatusSpan.textContent.includes("Speaking")) {
+                        systemStatusSpan.textContent = "Status: Ready";
+                    }
+                    URL.revokeObjectURL(audioPlayer.src);
+                };
+            }
         }
-        
-        // Modified to accept an array of image objects
-        async function saveMessage(role, text, images = []) {
+
+
+        /**
+         * Saves a message to the local chatHistory array and triggers display.
+         */
+        async function saveUserMessage(text, files) {
+            // 1. Prepare message parts for local history (context for API)
             const parts = [];
             
-            // Add all image parts
-            images.forEach(image => {
-                parts.push({ inlineData: { data: image.data, mimeType: image.mimeType } });
+            files.forEach(file => {
+                parts.push({ inlineData: { data: file.data, mimeType: file.mimeType } });
             });
             
-            const messageText = text || (role === 'user' && images.length > 0 ? "Multiple images attached." : (text || "Response"));
-            parts.push({ text: messageText });
+            parts.push({ text });
 
-            const message = { role, parts };
+            const message = { role: 'user', parts };
             
+            // 2. Push to local memory
             chatHistory.push(message);
+
+            // 3. Directly display the message
+            displayMessage(text, 'user', files);
         }
 
-        window.showConfirmClearHistory = function() {
-            stopAudioPlayback(); // Stop audio before showing modal
-            confirmModal.classList.remove('hidden');
-        }
-
-        window.performClearHistory = function() {
-            confirmModal.classList.add('hidden');
-            
-            stopAudioPlayback(); // Stop audio on clear
-            if (typingInterval) clearInterval(typingInterval); // Stop typing
-
+        /**
+         * Clears all local chat history.
+         * NOTE: Removed the browser's confirm() function as per environment instructions.
+         */
+        window.clearHistory = function() {
             chatHistory = []; 
             chatHistoryDiv.innerHTML = ''; 
             
-            userLocation = null;
-            updateLocationStatus('off');
-
-            // Clear images
-            clearImages();
-
+            // Restore initial welcome message
+            // FIX: Ensure initial message is visible again after clearing history
             initialMessageBox.classList.remove('hidden');
-            // Re-wrap initial message for correct alignment after clearing
-            const initialMessageContainer = document.createElement('div');
-            initialMessageContainer.className = 'model-bubble-container';
-            initialMessageContainer.appendChild(initialMessageBox);
-            chatHistoryDiv.appendChild(initialMessageContainer);
+            chatHistoryDiv.appendChild(initialMessageBox);
+            clearFiles();
 
-            // Re-add audio button to initial message if it was cleared
-            const initialText = document.getElementById('initial-message').textContent;
-            const existingButton = initialMessageBox.querySelector('.audio-btn');
-            if (!existingButton) {
-                const initialWrapper = initialMessageBox.querySelector('.model-bubble');
-                addAudioButtonToInitialMessage(initialText, initialWrapper);
-                // Ensure the initial message button is enabled after clear
-                initialWrapper.querySelector('.audio-btn').disabled = false;
-            }
-
-            systemStatusSpan.textContent = "Status: New Chat";
+            systemStatusSpan.textContent = "Status: New Chat Started";
             console.log("Chat history cleared locally.");
+            
+            // Reset status back to ready after a short pause
+            setTimeout(() => {
+                systemStatusSpan.textContent = "Status: Ready";
+            }, 1000);
         }
 
 
-        // --- Multiple Image Handling ---
+        // --- File Handling (Multi-File) ---
 
-        window.clearImages = function() {
-            uploadedImages = [];
-            imageInput.value = ''; // Clear file input
-            uploadedImagePreviewsDiv.innerHTML = '';
-            imagePreviewArea.classList.add('hidden');
-            imageCountText.textContent = "Image Attached : 0 Images";
+        /**
+         * Clears the file preview and the global state.
+         */
+        window.clearFiles = function() {
+            uploadedFiles = [];
+            fileInput.value = '';
+            fileListDiv.innerHTML = '';
+            filePreviewArea.classList.add('hidden');
             userInput.focus();
         }
-        
-        window.removeImage = function(index) {
-            uploadedImages.splice(index, 1);
-            renderPreviews();
-            userInput.focus();
-        }
-        
-        function renderPreviews() {
-            uploadedImagePreviewsDiv.innerHTML = '';
-            
-            if (uploadedImages.length === 0) {
-                imagePreviewArea.classList.add('hidden');
-                imageCountText.textContent = "Image Attached : 0 Images";
-                return;
-            }
-            
-            imagePreviewArea.classList.remove('hidden');
-            imageCountText.textContent = `Image Attached : ${uploadedImages.length} Images`;
 
-            uploadedImages.forEach((image, index) => {
-                const previewItem = document.createElement('div');
-                previewItem.className = 'preview-item';
-                
-                const img = document.createElement('img');
-                img.src = image.dataUrl;
-                img.alt = `Preview ${index + 1}`;
-                img.loading = 'lazy';
-                
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'remove-image-btn-sm';
-                removeBtn.textContent = 'X';
-                removeBtn.title = `Hatao Image ${index + 1}`;
-                removeBtn.onclick = () => removeImage(index);
-                
-                previewItem.appendChild(img);
-                previewItem.appendChild(removeBtn);
-                uploadedImagePreviewsDiv.appendChild(previewItem);
-            });
-            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; // Scroll to bottom to show preview area
-        }
-        
-        window.previewImages = function(event) {
+        /**
+         * Reads the uploaded files and updates the preview/global state.
+         */
+        window.previewFiles = function(event) {
             const files = event.target.files;
-            if (!files.length) {
-                // If the user cancelled the selection, do nothing if images are already present
-                if (uploadedImages.length === 0) {
-                    clearImages();
-                }
+            if (files.length === 0) {
+                clearFiles();
                 return;
             }
+            
+            const maxFiles = 5; // Limit to 5 files for stable context windows
+            uploadedFiles = [];
+            fileListDiv.innerHTML = '';
 
-            // Clear previous selections if starting a new upload round
-            uploadedImages = []; 
-
-            // Process all selected files
-            Array.from(files).forEach(file => {
-                if (!file.type.startsWith('image/')) {
-                    console.warn(`File ${file.name} is not an image and was skipped.`);
-                    return;
+            // Process files
+            for (let i = 0; i < Math.min(files.length, maxFiles); i++) {
+                const file = files[i];
+                
+                // 10MB limit per file
+                if (file.size > 10 * 1024 * 1024) { 
+                    const listItem = document.createElement('div');
+                    listItem.className = 'text-red-500';
+                    listItem.textContent = `[!] ${file.name} is too large (>10MB) and skipped.`;
+                    fileListDiv.appendChild(listItem);
+                    continue;
                 }
 
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = (e) => {
                     const base64String = e.target.result.split(',')[1];
-                    const mimeType = file.type;
-                    const dataUrl = e.target.result;
+                    const mimeType = file.type || 'application/octet-stream';
                     
-                    uploadedImages.push({
+                    uploadedFiles.push({
                         data: base64String,
                         mimeType: mimeType,
-                        dataUrl: dataUrl // Store Data URL for previewing
+                        name: file.name
                     });
+
+                    // Update the list view for file names
+                    const listItem = document.createElement('div');
+                    listItem.className = 'flex items-center space-x-2';
+                    const icon = file.type.startsWith('image/') 
+                        ? `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`
+                        : `<svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 2H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
                     
-                    // Re-render the previews every time a file loads
-                    if (uploadedImages.length === files.length) {
-                        renderPreviews();
+                    listItem.innerHTML = icon + `<span class="truncate">${file.name}</span>`;
+                    fileListDiv.appendChild(listItem);
+
+                    // Show a warning if more files were selected than the limit
+                    if (files.length > maxFiles && i === maxFiles - 1) {
+                         const warning = document.createElement('div');
+                         warning.className = 'text-yellow-500 font-bold mt-2';
+                         warning.textContent = `Warning: Only the first ${maxFiles} files were attached.`;
+                         fileListDiv.appendChild(warning);
                     }
                 };
                 reader.readAsDataURL(file);
-            });
-            
-            // If the user selected files but some were invalid, ensure we render what's valid.
-            // A short delay helps ensure all FileReader async operations complete if the list is small.
-            setTimeout(renderPreviews, 100); 
-        }
+            }
 
+            filePreviewArea.classList.remove('hidden');
+            userInput.focus();
+        }
 
         // --- Geolocation Functionality ---
-
-        function updateLocationStatus(state, message = '') {
-            
-            locationStatusSpan.className = 'text-xs p-1 px-2 rounded-lg transition-all border font-medium'; // Reset classes
-            
-            if (state === 'acquiring') {
-                locationStatusSpan.textContent = 'Loc: Acquiring...';
-                locationStatusSpan.classList.add('location-active', 'bg-orange-100', 'dark:bg-orange-700', 'text-orange-700', 'dark:text-orange-300', 'border-orange-400');
-            } else if (state === 'acquired') {
-                const lat = userLocation.lat.toFixed(4);
-                const lon = userLocation.lon.toFixed(4);
-                locationStatusSpan.textContent = `Loc: ${lat}, ${lon} (Acquired)`;
-                locationStatusSpan.classList.add('bg-green-200', 'text-green-900', 'border-green-400', 'location-active');
-            } else if (state === 'denied') {
-                locationStatusSpan.textContent = `Loc: Denied`;
-                locationStatusSpan.classList.add('bg-red-500', 'text-white', 'border-red-600');
-                permissionModal.classList.remove('hidden');
-            } else { // 'off' or error
-                locationStatusSpan.textContent = `Loc: Off${message ? ` (${message})` : ''}`;
-                locationStatusSpan.classList.add('text-gray-500', 'dark:text-gray-400', 'border-gray-300', 'dark:border-gray-600', 'bg-white', 'dark:bg-gray-800');
-            }
-        }
-
-
         window.getLocation = function() {
-            if (navigator.geolocation) {
-                updateLocationStatus('acquiring');
-
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        userLocation = {
-                            lat: position.coords.latitude,
-                            lon: position.coords.longitude
-                        };
-                        updateLocationStatus('acquired');
-                        console.log("Location acquired:", userLocation);
-                    },
-                    (error) => {
-                        userLocation = null;
-                        if (error.code === error.PERMISSION_DENIED) {
-                            updateLocationStatus('denied');
-                        } else {
-                            updateLocationStatus('off', 'GPS Error');
-                            console.error("Geolocation Error:", error.message);
-                        }
-                    },
-                    // Low accuracy is fine for general location context
-                    { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 } 
-                );
-            } else {
-                displayError("Geolocation is not supported by your browser, sir/ma'am.");
-                updateLocationStatus('off', 'Unsupported');
+            if (!navigator.geolocation) {
+                displayError("Geolocation is not supported by your browser.");
+                return;
             }
+
+            systemStatusSpan.textContent = "Status: Requesting Location...";
+            
+            locationBtn.disabled = true;
+            locationBtn.classList.add('opacity-50');
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLocation = {
+                        latitude: position.coords.latitude.toFixed(4),
+                        longitude: position.coords.longitude.toFixed(4)
+                    };
+                    systemStatusSpan.textContent = `Location: Lat ${userLocation.latitude}, Lon ${userLocation.longitude}`;
+                    
+                    locationBtn.disabled = false;
+                    locationBtn.classList.remove('opacity-50', 'bg-gray-500', 'hover:bg-gray-600');
+                    locationBtn.classList.add('bg-cyan-500', 'hover:bg-cyan-600');
+                },
+                (error) => {
+                    locationBtn.disabled = false;
+                    locationBtn.classList.remove('opacity-50', 'bg-cyan-500', 'hover:bg-cyan-600');
+                    locationBtn.classList.add('bg-gray-500', 'hover:bg-gray-600');
+
+                    let errorMsg = "Could not retrieve location data.";
+                    if (error.code === error.PERMISSION_DENIED) {
+                        errorMsg = "Access Denied.";
+                    }
+                    systemStatusSpan.textContent = `Status: Location Error (${errorMsg})`;
+                    userLocation = null; 
+                }
+            );
         }
 
+        // --- Main Send Message Function ---
 
-// ---------------------------------------------
-// TTS Configuration and Helper Function
-// ---------------------------------------------
-
-const apiKey = "YOUR_GOOGLE_API_KEY"; // Replace with your actual API key
-const TTS_MODEL = "tts-1"; // Or use "tts-1-hq" for higher quality
-
-// Function to call Google TTS and play response audio
-async function speakText(text) {
-  try {
-    // 1. Validation
-    if (!text || text.trim().length === 0) {
-      console.error("TTS Error: Empty text input");
-      return;
-    }
-
-    // 2. API Endpoint
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateAudio?key=${apiKey}`;
-
-    // 3. Payload Configuration
-    const payload = {
-      model: `models/${TTS_MODEL}`,
-      input: text,
-      voice: "Orus",          // Choose "Orus" (Male) or "Aditi" (Female)
-      languageCode: "en-IN"   // English with Indian accent
-    };
-
-    // 4. API Request
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.json();
-
-    // 5. Extract and Play Audio
-    const audioData = result?.audio?.data;
-    const mimeType = result?.audio?.mimeType || "audio/mp3";
-
-    if (!audioData) {
-      console.error("No valid audio data received:", result);
-      showTTSModalError("Something went wrong in TTS service, sir.");
-      return;
-    }
-
-    const audio = new Audio(`data:${mimeType};base64,${audioData}`);
-    await audio.play();
-
-    console.log("TTS: Audio played successfully.");
-
-  } catch (error) {
-    console.error("TTS Fetch Error:", error);
-    showTTSModalError("Something went wrong in TTS service, sir.");
-  }
-}
-
-// ---------------------------------------------
-// Error Modal Display Function
-// ---------------------------------------------
-function showTTSModalError(message) {
-  const modal = document.createElement("div");
-  modal.style.position = "fixed";
-  modal.style.top = "0";
-  modal.style.left = "0";
-  modal.style.width = "100%";
-  modal.style.height = "100%";
-  modal.style.display = "flex";
-  modal.style.alignItems = "center";
-  modal.style.justifyContent = "center";
-  modal.style.background = "rgba(0,0,0,0.6)";
-  modal.style.zIndex = "9999";
-
-  modal.innerHTML = `
-    <div style="
-      background:#1a1a1a;
-      padding:25px;
-      border-radius:15px;
-      color:#fff;
-      text-align:center;
-      max-width:400px;
-      box-shadow:0 4px 20px rgba(0,0,0,0.4);
-    ">
-      <h3 style="color:#ff4d4d;">System Error</h3>
-      <p>${message}</p>
-      <button id="ackBtn" style="
-        background:#e63946;
-        border:none;
-        color:white;
-        padding:10px 20px;
-        border-radius:8px;
-        margin-top:15px;
-        cursor:pointer;
-      ">Okay, understood</button>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  document.getElementById("ackBtn").addEventListener("click", () => {
-    document.body.removeChild(modal);
-  });
-}
-
-// ---------------------------------------------
-// Example usage
-// ---------------------------------------------
-// speakText("Hello, at your service. How may I assist you today, sir?");
-
+        /**
+         * Main function to send a message and get an AI response.
+         */
+        window.sendMessage = async function() {
+            const userQuery = userInput.value.trim();
+            const currentFiles = [...uploadedFiles]; // Capture files state
             
+            if (!userQuery && currentFiles.length === 0) return;
+
             // --- UI State: User Message & Loading ---
             userInput.value = ''; 
             sendBtn.disabled = true;
             sendBtn.classList.add('opacity-70', 'cursor-not-allowed');
-            typingIndicator.classList.remove('hidden'); 
-            systemStatusSpan.textContent = "Status: Thinking, please wait...";
-
-            let promptText = userQuery;
-            const hasImages = uploadedImages.length > 0;
+            systemStatusSpan.textContent = "Status: Thinking...";
             
-            if (userLocation) {
-                // Location information ko Hindi mein shamil karein
-                promptText = `User Location: [${userLocation.lat.toFixed(6)}, ${userLocation.lon.toFixed(6)}]. Location provided by user. Ques: ${userQuery}`;
-            } else if (hasImages && !userQuery) {
-                 promptText = "Multiple images attached ,See the image what are you seeing in this, give guidance to me on this pic?";
-            } else if (hasImages && userQuery) {
-                 promptText = `Please analyze these images carefully, keeping the questions in mind. Ques: ${userQuery}`;
-            }
-
-            const currentImagesForSave = uploadedImages.map(img => ({
-                data: img.data,
-                mimeType: img.mimeType
-            }));
-            const currentImagesDataUrls = uploadedImages.map(img => img.dataUrl);
-
             // 1. Save and display the user's message immediately
-            const userDisplayText = userQuery || (hasImages ? `Multiple Images Attached (${uploadedImages.length})` : "Image attached.");
-            createMessageBubble('user', userDisplayText, currentImagesDataUrls);
-            
-            await saveMessage('user', userQuery, currentImagesForSave);
-            
-            // Clear location and image state immediately after using them
-            userLocation = null;
-            updateLocationStatus('off');
-            clearImages();
+            let userTextForDisplay = userQuery || "";
+            if (currentFiles.length > 0) {
+                 userTextForDisplay = `${userTextForDisplay} (Attached ${currentFiles.length} file${currentFiles.length > 1 ? 's' : ''})`.trim();
+            }
 
-            // 2. Prepare chat history for API (context)
-            const contentsForApi = [...chatHistory]; 
-            // The last entry contains the current prompt and images, we ensure the text part is correctly set
-            const lastContent = contentsForApi[contentsForApi.length - 1];
-            const textPart = lastContent.parts.find(p => p.text !== undefined);
-            if (textPart) {
-                textPart.text = promptText; 
+            await saveUserMessage(userTextForDisplay, currentFiles);
+            clearFiles(); // Clear files immediately after saving for the session
+
+            // 2. Prepare the parts array for the API payload
+            let parts = [];
+            
+            // Add file parts
+            currentFiles.forEach(file => {
+                parts.push({
+                    inlineData: {
+                        data: file.data,
+                        mimeType: file.mimeType
+                    }
+                });
+            });
+            
+            // Add text part 
+            let promptWithLocation = userQuery || "Analyze the provided files.";
+            if (userLocation) {
+                promptWithLocation = `(User Location: Lat ${userLocation.latitude}, Lon ${userLocation.longitude}) ${promptWithLocation}`;
+            }
+            parts.push({ text: promptWithLocation });
+
+            // 3. Prepare chat history for API (context)
+            const contentsForApi = [...chatHistory];
+            if (contentsForApi.length > 0) {
+                contentsForApi[contentsForApi.length - 1].parts = parts;
             }
             
-            const limitedContentsForApi = contentsForApi.slice(-10); 
+            const limitedContentsForApi = contentsForApi.slice(-10);
 
             const payload = {
                 contents: limitedContentsForApi, 
@@ -981,96 +868,57 @@ function showTTSModalError(message) {
                 body: JSON.stringify(payload)
             };
 
-            let modelResponseText = null;
+            // 4. Display model placeholder and fetch response
+            const modelTextElement = displayMessage('', 'model', null); 
 
             try {
-                // Get the model's response text
                 const response = await fetchWithRetry(API_URL, options);
                 const result = await response.json();
                 
-                modelResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                const modelResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
                 if (!modelResponseText) {
-                    throw new Error("Model returned an empty reply");
+                    throw new Error("Received an empty or malformed response from the model.");
                 }
                 
-                const cleanResponseText = stripMarkdown(modelResponseText);
-                
-                // Hide indicator, update status
-                typingIndicator.classList.add('hidden'); 
-                systemStatusSpan.textContent = "Status: Writing reply...";
+                // 5. Run the typewriter effect and TTS
+                await typewriterEffect(modelTextElement, modelResponseText);
 
-                // Create the model bubble but with EMPTY text, so typing can start
-                const {textSpan, audioButton} = createMessageBubble('model', '');
-                
-                // Set the full text on the bubble wrapper immediately for the TTS function later
-                const modelBubble = textSpan.closest('.model-bubble');
-                modelBubble.dataset.fullText = cleanResponseText; 
-                
-                // 3. Save the final message to history
-                // This happens before typing starts, as the text is finalized now
-                await saveMessage('model', cleanResponseText);
-                
-                // 4. *** Start the Typing Animation (and chain the audio) ***
-                
-                // Define callback to start audio after typing is done
-                const audioCallback = () => {
-                    systemStatusSpan.textContent = "Status: Audio starting...";
-                    startAutoAudio(audioButton);
-                };
-
-                // Start typing the response with 35ms delay
-                typeText(textSpan, cleanResponseText, 35, audioCallback);
-
+                // 6. Save the final message to local memory (for subsequent context)
+                const modelMessage = { role: 'model', parts: [{ text: modelResponseText }] };
+                chatHistory.push(modelMessage);
 
             } catch (error) {
-                // Log and display error
                 console.error("API Error:", error);
-                const errorMsg = error.message.includes("API connection error") ? error.message : `API request failed: ${error.message}`;
-                displayError(errorMsg); 
-                
-                // If failed before typing, update status
-                typingIndicator.classList.add('hidden');
-                systemStatusSpan.textContent = "Status: Error";
+                if (modelTextElement.parentNode) {
+                    modelTextElement.parentNode.remove();
+                }
+                displayError(`API connection error: ${error.message}. Please check console.`);
             } finally {
-                // Clean up UI state regardless of success or failure
                 sendBtn.disabled = false;
                 sendBtn.classList.remove('opacity-70', 'cursor-not-allowed');
                 userInput.focus();
-                
-                // If typing is still active (which shouldn't happen here if API failed immediately), we clear it.
-                // Final status update will happen after audio starts in success case.
+                // If TTS finished speaking, status is already 'Ready'. Otherwise, set it now.
+                if (!systemStatusSpan.textContent.includes("Speaking")) {
+                    systemStatusSpan.textContent = "Status: Ready";
+                }
             }
         }
         
-        // --- Initialization ---
+        /**
+         * Initialize the chat by checking if any messages exist and ensuring the
+         * initial welcome message is shown if the chat history is empty.
+         */
         document.addEventListener('DOMContentLoaded', () => {
-            initializeTheme();
-            updateLocationStatus('off');
-            
-            // Re-wrap initial message for correct alignment
-            const initialMessageContainer = document.createElement('div');
-            initialMessageContainer.className = 'model-bubble-container';
-            initialMessageContainer.appendChild(initialMessageBox);
-            chatHistoryDiv.appendChild(initialMessageContainer);
-            
-            // Add audio button to initial message
-            const initialText = document.getElementById('initial-message').textContent;
-            const initialWrapper = initialMessageBox.querySelector('.model-bubble');
-            
-            addAudioButtonToInitialMessage(initialText, initialWrapper);
-            
-            // Ensure the initial message text span takes up necessary space
-            document.getElementById('initial-message').classList.add('flex-grow');
-            
-            // Enable the initial message audio button
-            const initialAudioButton = initialMessageBox.querySelector('.audio-btn');
-            if (initialAudioButton) {
-                initialAudioButton.disabled = false;
-                // Immediately start audio for the initial message to comply with the "default" request
-                startAutoAudio(initialAudioButton);
+             // Check if the chat container has any children other than the initial message box
+            if (chatHistoryDiv.children.length === 1 && chatHistoryDiv.children[0].id === 'initial-message-box') {
+                initialMessageBox.classList.remove('hidden');
+            } else if (chatHistoryDiv.children.length > 1) {
+                // If there are more messages, hide the initial message
+                initialMessageBox.classList.add('hidden');
             }
         });
+
     </script>
 </body>
 </html>
