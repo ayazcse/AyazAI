@@ -949,7 +949,7 @@
                     };
                     
                     audio.play().catch(e => {
-                        console.error("Audio playback failed (usually due to user interaction requirement):", e);
+                        console.error("Audio playback failed :", e);
                         // If autoplay fails, revert to ready state and keep the speaker button
                         button.disabled = false;
                         button.classList.remove('audio-playing');
@@ -959,12 +959,12 @@
                     });
 
                 } else {
-                    displayError("TTS API se sahi audio data nahi aaya (Did not receive proper audio data from TTS API). Kripya dobara try karein, huzoor.");
+                    displayError("Unable to retrieve valid audio data from the TTS API. Please retry in a moment.");
                     stopAudioPlayback();
                 }
             } catch (error) {
                 console.error("TTS API Error during speech generation:", error);
-                displayError("TTS service mein koi gadbad ho gayi (Something went wrong in TTS service). Kripya network check karein, sir.");
+                displayError("Something went wrong in TTS service, sir.");
                 stopAudioPlayback();
             }
         }
