@@ -3,85 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AyazAI: Fullscreen Fixed Input Chat</title>
+    <title>AI:az: Fullscreen Fixed Input Chat (Light/Dark Mode)</title>
+    <!-- ADDED: Browser Icon (Favicon) - Using a simple, modern sparkling SVG icon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Tone.js for typing sound effects -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
     <style>
-        /* Custom CSS for Inter font and chat aesthetics */
+        /* --- Base Styling and Theme Variables (CSS Variables for dynamic theming) --- */
         body {
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            transition: background-color 0.4s;
-            /* LIGHT MODE: Outer Gray Theme (Gray-200) */
-            background-color: #e5e7eb; /* gray-200 */
-        }
-
-        /* Dark Mode Body Background */
-        .dark body {
-            background-color: #1a202c; /* Deep slate gray */
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
         }
         
-        /* Main chat history container */
-        .chat-history-scroll {
-            /* Calculate height: full viewport height minus header (approx 80px) and fixed input area (approx 150px) */
-            min-height: calc(100vh - 180px); 
-            height: calc(100vh - 180px);
-            overflow-y: auto;
-            padding-bottom: 12rem; /* Ensure space above the fixed input bar */
-            transition: background-color 0.4s;
-            background-color: #e5e7eb; /* Outer background color */
-        }
-        .dark .chat-history-scroll {
-            background-color: #1a202c;
+        /* Define Light Mode Variables */
+        :root {
+            --bg-primary: #f3f4f6; /* Gray-100 (Outer Background) */
+            --bg-secondary: #ffffff; /* White (Header/Input Bar) */
+            --text-color: #1f2937; /* Dark Gray (Text) */
+            --border-color: #e5e7eb; /* Gray-200 (Borders/Dividers) */
+            
+            /* Light Mode Bubble Colors (from previous request) */
+            --user-bubble-bg: #fff3b0; /* Soft Yellow */
+            --user-bubble-border: #ffeb8e;
+            --model-bubble-bg: #cceeff; /* Light Sky Blue */
+            --model-bubble-border: #99ccff;
         }
 
-        /* --- Social Media Bubble Styling --- */
+        /* Define Dark Mode Variables */
+        body.dark {
+            --bg-primary: #000000; /* Pure Black (Outer Background) */
+            --bg-secondary: #000000; /* Pure Black (Header/Input Bar) */
+            --text-color: #f3f4f6; /* Light Gray (Text) */
+            --border-color: #1f2937; /* Dark Gray (Borders/Dividers) */
+            
+            /* Dark Mode Bubble Colors (from user image) */
+            --user-bubble-bg: #374151; /* Dark Gray (AI/Model) */
+            --user-bubble-border: #4b5563;
+            --model-bubble-bg: #1e40ff; /* Bright Blue (User) */
+            --model-bubble-border: #3b82f6;
+        }
+        
+        /* Apply theme variables to specific elements */
+        body { background-color: var(--bg-primary); }
+        .themed-header, .input-container { background-color: var(--bg-secondary); border-color: var(--border-color); }
+        .themed-input { 
+            background-color: var(--bg-secondary); 
+            border-color: var(--border-color); 
+            color: var(--text-color);
+        }
+        .themed-status { background-color: var(--bg-secondary); border-color: var(--border-color); color: var(--text-color); }
+        .themed-file-preview { background-color: var(--border-color); }
+
+        /* Main chat history container is now handled by flex-grow and overflow-y-auto on its parent */
+
+        /* --- Custom Bubble Styling --- */
         .user-bubble, .model-bubble {
-            padding: 0.7rem 1rem; 
-            border-radius: 1rem; 
+            padding: 0.8rem 1.1rem; 
+            border-radius: 1.2rem; 
             word-wrap: break-word; 
             overflow-wrap: break-word;
             max-width: 85%; 
             line-height: 1.4;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); 
-            transition: background-color 0.2s, box-shadow 0.2s;
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        /* MODEL Bubble (AI) - Left Aligned */
+        .model-bubble {
+            background-color: var(--model-bubble-bg); 
+            border-radius: 1.2rem 1.2rem 1.2rem 0.5rem; 
+            margin-right: auto;
+            color: var(--text-color);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--model-bubble-border);
         }
 
-        .light .user-bubble {
-            background-color: #dbeafe; /* Blue-100 (Extremely Light Blue) */
-            color: #1f2937; 
-            border-radius: 1rem 1rem 0.25rem 1rem; 
+        /* USER Bubble (Human) - Right Aligned */
+        .user-bubble {
+            background-color: var(--user-bubble-bg); 
+            border-radius: 1.2rem 1.2rem 0.5rem 1.2rem; 
             margin-left: auto;
-            box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2); 
-            border-color: #93c5fd; 
+            color: var(--text-color);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--user-bubble-border);
         }
-        .light .model-bubble {
-            background-color: #f3f4f6; /* Gray-100 (Very Light Neutral) */
-            color: #1f2937; 
-            border-radius: 1rem 1rem 1rem 0.25rem; 
-            margin-right: auto;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-            border-color: #d1d5db; 
+
+        /* Adjusting text color for dark mode where bubbles might be dark */
+        body.dark .model-bubble {
+            color: #f3f4f6; /* Light text for bright blue bubble */
         }
-        
-        .dark .user-bubble {
-            background-color: #06b6d4; /* Cyan-600 (Vibrant) */
-            color: white; 
-            border-radius: 1rem 1rem 0.25rem 1rem;
-            box-shadow: 0 1px 3px rgba(6, 182, 212, 0.4); 
-            border: none;
+        body.dark .user-bubble {
+            color: #f3f4f6; /* Light text for dark gray bubble */
         }
-        .dark .model-bubble {
-            background-color: #374151; /* Darker gray for model bubble */
-            color: #e5e7eb; /* Light text */
-            border-radius: 1rem 1rem 1rem 0.25rem;
-            box-shadow: none;
-            border: none;
-        }
-        
+
+        /* Loader and Cursor */
         .loader {
             border-top-color: #6366f1; 
             animation: spin 1s ease-in-out infinite;
@@ -104,70 +121,72 @@
             50% { opacity: 0; }
         }
 
-        /* Fixed Input Bar Styling */
-        .fixed-input-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            z-index: 50;
-            /* Container for centering max-width content */
-        }
+        /* Removed fixed-input-bar CSS - handled by flex layout now */
     </style>
 </head>
-<body class="p-0 flex flex-col items-center justify-start text-gray-900 dark:text-gray-100 min-h-screen">
+<!-- UPDATED: Set body to full height and use flex column layout, preventing body scrolling -->
+<body class="p-0 flex flex-col h-screen overflow-hidden">
 
-    <!-- 1. Main Centering Container (Max Width) -->
-    <div class="container mx-auto w-full max-w-4xl flex flex-col flex-grow h-screen">
+    <!-- 1. Header (FIXED AT TOP - flex-shrink-0) -->
+    <header class="themed-header flex-shrink-0 w-full max-w-4xl mx-auto p-4 md:p-6 border-b flex justify-between items-center flex-wrap gap-4 z-10 shadow-md">
         
-        <!-- 2. Header (Always visible at the top) -->
-        <header class="flex-shrink-0 p-4 md:p-6 bg-gray-200 dark:bg-gray-900 transition-colors border-b border-gray-300 dark:border-gray-700 flex justify-between items-center flex-wrap gap-4 sticky top-0 z-10">
-            <!-- Action Group: Theme, TTS & New Chat -->
-            <div class="flex space-x-2">
-                <!-- Theme Toggle -->
-                <button id="theme-toggle" class="p-3 rounded-full bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-cyan-400 transition-colors shadow-md dark:shadow-none" onclick="toggleTheme()">
-                    <svg id="sun-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    <svg id="moon-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        <!-- Action Group: Theme Toggle, TTS & New Chat -->
+        <div class="flex space-x-4 md:space-x-6">
+            
+            <!-- Theme Toggle -->
+            <div class="flex flex-col items-center">
+                <button id="theme-toggle" class="p-3 rounded-full transition-colors shadow-md" onclick="toggleTheme()">
+                    <!-- Icon will be updated by JS -->
                 </button>
-                
-                <!-- TTS Toggle (New) -->
-                <button id="tts-toggle" class="p-3 rounded-full transition-colors shadow-md dark:shadow-none" onclick="toggleTts()">
+                <span class="text-xs mt-1 font-medium text-gray-500 dark:text-gray-400">Theme</span>
+            </div>
+
+            <!-- TTS Toggle -->
+            <div class="flex flex-col items-center">
+                <button id="tts-toggle" class="p-3 rounded-full transition-colors shadow-md" onclick="toggleTts()">
                     <svg id="tts-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"></svg>
                 </button>
+                <span class="text-xs mt-1 font-medium text-gray-500 dark:text-gray-400">Audio</span>
+            </div>
 
-                <!-- New Chat Button (Clear History) -->
+            <!-- New Chat Button (Clear History) -->
+            <div class="flex flex-col items-center">
                 <button id="new-chat-btn" 
-                        class="p-3 rounded-full bg-red-500 text-white transition-colors shadow-md hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-600" 
+                        class="p-3 rounded-full bg-red-500 text-white transition-colors shadow-md hover:bg-red-600" 
                         onclick="clearHistory()">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.74 9l-.387 7.054a2 2 0 01-1.995 2.5l-2.673-.535a2 2 0 01-1.995-2.5L9.26 9m1.06 4.676l-1.06-1.06M12 6h6m-6 0V4m-6 0h6"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5v-1a1 1 0 011-1h4a1 1 0 011 1v1M5 7h14a1 1 0 011 1v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8a1 1 0 011-1z"></path></svg>
                 </button>
-            </div>
-            
-            <!-- Gradient Title -->
-            <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-indigo-600 tracking-wider flex-grow text-center min-w-[200px] dark:from-cyan-400 dark:to-indigo-400">AyazAI</h1>
-            
-            <!-- System Status -->
-            <span id="system-status" class="text-xs sm:text-sm text-gray-700 dark:text-gray-400 p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 transition-colors">Status: Ready</span>
-        </header>
-
-        <!-- 3. Chat History (Scrollable Area) -->
-        <div id="chat-history" class="chat-history-scroll p-4 md:p-6 flex flex-col space-y-3">
-            <!-- Initial Welcome Message -->
-            <div id="initial-message-box" class="model-bubble p-3">
-                <span id="initial-message">Hello! I am AyazAI, a local assistant ready to chat. I support multi-file upload, text-to-speech, and location awareness. Please toggle the volume icon to turn the voice reply on or off!</span>
+                <span class="text-xs mt-1 font-medium text-gray-500 dark:text-gray-400">Clear</span>
             </div>
         </div>
+        
+        <!-- Gradient Title -->
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-indigo-600 tracking-wider flex-grow text-center min-w-[200px]">AI:az</h1>
+        
+        <!-- System Status -->
+        <span id="system-status" class="themed-status text-xs sm:text-sm p-2 border rounded-lg shadow-inner">Status: Ready</span>
+    </header>
 
-    </div>
+    <!-- 2. Chat History Wrapper (SCROLLABLE AREA - flex-grow overflow-y-auto) -->
+    <main id="chat-history-wrapper" class="flex-grow overflow-y-auto w-full max-w-4xl mx-auto p-4 md:p-6">
+        <!-- Initial Welcome Message (Moved inside the scrollable area) -->
+        <div id="initial-message-box" class="model-bubble p-3">
+            <span id="initial-message">Hello! I am **AI:az**, a local assistant ready to chat. I support multi-file upload, text-to-speech, and location awareness. Please tap the volume icon to enable/disable voice replies!</span>
+        </div>
+        <!-- All chat bubbles will be appended to this container -->
+        <div id="chat-history" class="flex flex-col space-y-3">
+            <!-- Messages are injected here -->
+        </div>
+    </main>
 
-    <!-- 4. Fixed Input Section (Always at the bottom of the viewport) -->
-    <div class="fixed-input-bar bg-white dark:bg-gray-800 shadow-2xl p-4 md:p-6 border-t border-gray-300 dark:border-gray-700">
+    <!-- 3. Fixed Input Section (FIXED AT BOTTOM - flex-shrink-0) -->
+    <div id="input-container" class="themed-header flex-shrink-0 w-full p-4 md:p-6 border-t shadow-2xl z-10">
         <div class="container mx-auto w-full max-w-4xl">
             
             <!-- File Preview Area -->
-            <div id="file-preview-area" class="mb-3 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hidden transition-colors">
-                <p class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Attached Files (Max 5 will be processed):</p>
-                <div id="file-list" class="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+            <div id="file-preview-area" class="themed-file-preview mb-3 p-3 rounded-xl hidden transition-colors shadow-inner">
+                <p class="text-sm font-semibold text-gray-700 mb-2">Attached Files (Max 5 will be processed):</p>
+                <div id="file-list" class="space-y-1 text-sm text-gray-600">
                     <!-- Files will be listed here -->
                 </div>
                 <button onclick="clearFiles()" class="text-sm text-red-500 hover:text-red-600 mt-2">Remove All Files</button>
@@ -194,8 +213,8 @@
                 <input type="file" id="file-input" accept="*/*" multiple class="hidden" onchange="previewFiles(event)">
 
                 <!-- Text Input -->
-                <input type="text" id="user-input" placeholder="Message AyazAI..."
-                       class="flex-grow p-3 sm:p-4 border border-gray-300 dark:border-gray-700 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 dark:text-gray-100 transition-colors placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
+                <input type="text" id="user-input" placeholder="Message AI:az..."
+                       class="themed-input flex-grow p-3 sm:p-4 border rounded-xl focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-500 text-sm sm:text-base shadow-inner"
                        onkeypress="if(event.key === 'Enter') sendMessage()">
                 
                 <!-- Send Button -->
@@ -210,9 +229,9 @@
             
     <!-- Custom Modal for Errors -->
     <div id="error-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-700 rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl dark:shadow-red-600/50">
-            <h3 class="text-xl font-bold text-red-600 mb-3 dark:text-red-400">Error: System Alert</h3>
-            <p id="error-message" class="text-gray-700 mb-4 dark:text-gray-200">An unknown error occurred.</p>
+        <div class="bg-white rounded-xl p-6 w-full max-w-sm transform transition-all shadow-2xl">
+            <h3 class="text-xl font-bold text-red-600 mb-3">Error: System Alert</h3>
+            <p id="error-message" class="text-gray-700 mb-4">An unknown error occurred.</p>
             <button class="w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700" onclick="document.getElementById('error-modal').classList.add('hidden')">Acknowledge</button>
         </div>
     </div>
@@ -231,21 +250,26 @@
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-btn');
         const locationBtn = document.getElementById('location-btn'); 
-        const chatHistoryDiv = document.getElementById('chat-history');
+        // UPDATED: chatHistoryDiv is where messages are appended
+        const chatHistoryDiv = document.getElementById('chat-history'); 
+        // NEW: chatScrollWrapper is the parent that scrolls
+        const chatScrollWrapper = document.getElementById('chat-history-wrapper'); 
         const errorModal = document.getElementById('error-modal');
         const errorMessage = document.getElementById('error-message');
         const systemStatusSpan = document.getElementById('system-status');
         const initialMessageBox = document.getElementById('initial-message-box');
-        const sunIcon = document.getElementById('sun-icon');
-        const moonIcon = document.getElementById('moon-icon');
         const fileInput = document.getElementById('file-input');
         const filePreviewArea = document.getElementById('file-preview-area');
         const fileListDiv = document.getElementById('file-list');
         const ttsIcon = document.getElementById('tts-icon');
+        const themeToggleBtn = document.getElementById('theme-toggle');
         
+        // --- Theme State ---
+        // Initialize theme based on localStorage, default to 'light'
+        let currentTheme = localStorage.getItem('theme') || 'light';
+
         // --- TTS State ---
         let isTtsEnabled = localStorage.getItem('ttsEnabled') === 'true';
-        // CRITICAL UPDATE: Set minimum length to 1 to ensure TTS runs on every non-empty reply as requested.
         const TTS_MIN_LENGTH = 1; 
 
         // --- API Constants ---
@@ -255,7 +279,7 @@
         const TTS_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL_NAME}:generateContent?key=${apiKey}`; 
         
         // --- SYSTEM PROMPT: Professional, Clear, and Concise Format ---
-        const SYSTEM_PROMPT = "You are a professional, highly articulate, and concise conversational assistant named AyazAI, focused on providing structured, clear, and easy-to-understand responses with an Indian context and perspective. Maintain context and memory throughout the conversation. For any query requiring current or real-time information, you must use your search tool. You MUST respond in clear, plain text and AVOID using any Markdown formatting characters (like *, #, or `). Analyze and summarize any provided documents or images. Since this application runs locally without a database, your memory only lasts for this session.";
+        const SYSTEM_PROMPT = "You are a professional, highly articulate, and concise conversational assistant named AI:az, focused on providing structured, clear, and easy-to-understand responses with an Indian context and perspective. Maintain context and memory throughout the conversation. For any query requiring current or real-time information, you must use your search tool. You MUST respond in clear, plain text and AVOID using any Markdown formatting characters (like *, #, or `). Analyze and summarize any provided documents or images. Since this application runs locally without a database, your memory only lasts for this session.";
         
         const TYPING_DELAY = 20; // Default Milliseconds per character for non-TTS
         const TTS_TYPING_SPEED = 10; // Faster speed for sync with audio
@@ -264,9 +288,6 @@
         let synth = null;
         let audioContextInitialized = false;
 
-        /**
-         * Initializes the Tone.js audio context and synth object for typing sound.
-         */
         function initAudio() {
             if (!audioContextInitialized) {
                 synth = new Tone.Synth({
@@ -280,7 +301,6 @@
                     volume: -18
                 }).toDestination();
                 
-                // Force start context on user interaction
                 Tone.start().then(() => {
                     audioContextInitialized = true;
                     console.log("Audio Context Started for typing sound.");
@@ -288,11 +308,7 @@
             }
         }
 
-        /**
-         * Plays a short typing sound effect.
-         */
         function playTypingSound() {
-            // Only play typing sound if TTS is disabled
             if (audioContextInitialized && Tone.context.state === 'running' && !isTtsEnabled) {
                 synth.triggerAttackRelease("G4", "64n"); 
             }
@@ -304,11 +320,44 @@
             userInput.addEventListener('focus', initOnce, { once: true });
         });
         
-        // --- TTS Helper Functions (PCM to WAV) ---
+        // --- Theme Management ---
         
         /**
-         * Converts a base64 string to an ArrayBuffer.
+         * Applies the theme classes and updates the toggle button icon.
          */
+        function applyTheme(theme) {
+            currentTheme = theme;
+            localStorage.setItem('theme', theme);
+            
+            if (theme === 'dark') {
+                document.body.classList.add('dark');
+                // Moon Icon
+                themeToggleBtn.innerHTML = '<svg class="w-6 h-6 text-yellow-300" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>';
+                themeToggleBtn.classList.remove('bg-gray-200');
+                themeToggleBtn.classList.add('bg-gray-800');
+                // Adjust file preview colors for dark mode manually as they have hardcoded text colors
+                filePreviewArea.classList.add('bg-gray-900');
+                filePreviewArea.querySelectorAll('p, .text-gray-600').forEach(el => el.classList.add('text-gray-300'));
+            } else {
+                document.body.classList.remove('dark');
+                // Sun Icon
+                themeToggleBtn.innerHTML = '<svg class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 2a1 1 0 01.707.293l.353.353a1 1 0 01-1.414 1.414l-.353-.353A1 1 0 0114 4zm-4 14a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm6-4a1 1 0 01.293.707l.353.353a1 1 0 01-1.414 1.414l-.353-.353A1 1 0 0116 14zm-14-2a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm17-1a1 1 0 011 1h1a1 1 0 110 2h-1a1 1 0 01-1-1zM5 4.707A1 1 0 015.707 4l.353.353a1 1 0 01-1.414 1.414L4.293 5.414A1 1 0 015 4.707zM18 16a1 1 0 01-.707.293l-.353-.353a1 1 0 011.414-1.414l.353.353A1 1 0 0118 16zM6 16a1 1 0 01-.293.707l-.353.353a1 1 0 01-1.414-1.414l.353-.353A1 1 0 016 16zM12 7a5 5 0 100 10 5 5 0 000-10zM7 12a5 5 0 1110 0 5 5 0 01-10 0z" clip-rule="evenodd"></path></svg>';
+                themeToggleBtn.classList.add('bg-gray-200');
+                themeToggleBtn.classList.remove('bg-gray-800');
+                // Restore file preview colors for light mode
+                filePreviewArea.classList.remove('bg-gray-900');
+                filePreviewArea.querySelectorAll('p, .text-gray-300').forEach(el => el.classList.remove('text-gray-300'));
+            }
+            updateTtsIcon(); // Ensure TTS icon style adapts
+        }
+
+        window.toggleTheme = function() {
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+        }
+        
+        // --- TTS Helper Functions (PCM to WAV) ---
+        
         function base64ToArrayBuffer(base64) {
             const binaryString = atob(base64);
             const len = binaryString.length;
@@ -319,9 +368,6 @@
             return bytes.buffer;
         }
 
-        /**
-         * Converts signed 16-bit PCM audio data to a playable WAV format Blob.
-         */
         function pcmToWav(pcm16, sampleRate) {
             const numChannels = 1;
             const bytesPerSample = 2;
@@ -329,7 +375,7 @@
             const byteRate = sampleRate * blockAlign;
             const dataLength = pcm16.length * bytesPerSample;
             const buffer = new ArrayBuffer(44 + dataLength);
-            const view = new DataView(buffer);
+            const dataView = new DataView(buffer);
             
             function writeString(view, offset, str) {
                 for (let i = 0; i < str.length; i++) {
@@ -340,79 +386,64 @@
             let offset = 0;
 
             // RIFF chunk
-            writeString(view, offset, 'RIFF'); offset += 4;
-            view.setUint32(offset, 36 + dataLength, true); offset += 4;
-            writeString(view, offset, 'WAVE'); offset += 4;
+            writeString(dataView, offset, 'RIFF'); offset += 4;
+            dataView.setUint32(offset, 36 + dataLength, true); offset += 4;
+            writeString(dataView, offset, 'WAVE'); offset += 4;
 
             // fmt chunk
-            writeString(view, offset, 'fmt '); offset += 4;
-            view.setUint32(offset, 16, true); offset += 4;      // ChunkSize (16 for PCM)
-            view.setUint16(offset, 1, true); offset += 2;       // AudioFormat (1 for PCM)
-            view.setUint16(offset, numChannels, true); offset += 2;
-            view.setUint32(offset, sampleRate, true); offset += 4;
-            view.setUint32(offset, byteRate, true); offset += 4;
-            view.setUint16(offset, blockAlign, true); offset += 2;
-            view.setUint16(offset, bytesPerSample * 8, true); offset += 2; // Bits per sample (16)
+            writeString(dataView, offset, 'fmt '); offset += 4;
+            dataView.setUint32(offset, 16, true); offset += 4;      // ChunkSize (16 for PCM)
+            dataView.setUint16(offset, 1, true); offset += 2;       // AudioFormat (1 for PCM)
+            dataView.setUint16(offset, numChannels, true); offset += 2;
+            dataView.setUint32(offset, sampleRate, true); offset += 4;
+            dataView.setUint32(offset, byteRate, true); offset += 4;
+            dataView.setUint16(offset, blockAlign, true); offset += 2;
+            dataView.setUint16(offset, bytesPerSample * 8, true); offset += 2; // Bits per sample (16)
 
             // data chunk
-            writeString(view, offset, 'data'); offset += 4;
-            view.setUint32(offset, dataLength, true); offset += 4;
+            writeString(dataView, offset, 'data'); offset += 4;
+            dataView.setUint32(offset, dataLength, true); offset += 4;
             
             // Write PCM data
             for (let i = 0; i < pcm16.length; i++, offset += 2) {
-                view.setInt16(offset, pcm16[i], true); // Signed 16-bit little-endian
+                dataView.setInt16(offset, pcm16[i], true); // Signed 16-bit little-endian
             }
 
             return new Blob([buffer], { type: 'audio/wav' });
         }
 
 
-        // --- Theme Management ---
-
-        /**
-         * Applies the selected theme and saves it to localStorage.
-         */
-        function applyTheme(theme) {
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                moonIcon.classList.add('hidden');
-                sunIcon.classList.remove('hidden');
-            } else {
-                document.documentElement.classList.remove('dark');
-                moonIcon.classList.remove('hidden');
-                sunIcon.classList.add('hidden');
-            }
-            localStorage.setItem('theme', theme);
-        }
-
-        /**
-         * Toggles the current theme.
-         */
-        window.toggleTheme = function() {
-            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-            applyTheme(newTheme);
-        }
-        
-        // Load theme preference on startup
-        const preferredTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        applyTheme(preferredTheme);
-        
         // --- TTS Toggle Management ---
         
         /**
-         * Updates the TTS icon to reflect the current state.
+         * Updates the TTS icon to reflect the current state and theme.
          */
         function updateTtsIcon() {
+            const isDark = document.body.classList.contains('dark');
+
             if (isTtsEnabled) {
                 // Volume On icon
                 ttsIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1V7a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0111 1v12a1 1 0 01-.293.707l-4.707 4.707z"></path>';
-                ttsIcon.parentNode.classList.remove('text-gray-400', 'bg-gray-200', 'dark:bg-gray-700');
-                ttsIcon.parentNode.classList.add('text-orange-500', 'bg-yellow-100', 'dark:bg-orange-900/50');
+                
+                ttsIcon.parentNode.classList.remove('text-gray-400', 'bg-gray-200', 'bg-gray-800', 'text-gray-500');
+
+                if (isDark) {
+                     ttsIcon.parentNode.classList.add('text-orange-400', 'bg-gray-800');
+                } else {
+                     ttsIcon.parentNode.classList.add('text-orange-500', 'bg-yellow-100');
+                }
+
             } else {
-                // Volume Off/Mute icon (with a slash through)
+                // Volume Off/Mute icon
                 ttsIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636M15 13.06L18 16m-4-6l3-3m-6 3H4a1 1 0 01-1-1V7a1 1 0 011-1h1.586l4.707-4.707A1 1 0 0111 1v7.06"></path>';
-                ttsIcon.parentNode.classList.add('text-gray-400', 'bg-gray-200', 'dark:bg-gray-700');
-                ttsIcon.parentNode.classList.remove('text-orange-500', 'bg-yellow-100', 'dark:bg-orange-900/50');
+                
+                ttsIcon.parentNode.classList.remove('text-orange-500', 'bg-yellow-100', 'text-orange-400');
+                
+                if (isDark) {
+                    ttsIcon.parentNode.classList.add('text-gray-500', 'bg-gray-800');
+                } else {
+                    ttsIcon.parentNode.classList.add('text-gray-400', 'bg-gray-200');
+                }
             }
         }
         
@@ -421,29 +452,21 @@
             localStorage.setItem('ttsEnabled', isTtsEnabled);
             updateTtsIcon();
             if (isTtsEnabled) {
-                console.log("Text-to-Speech Enabled. WARNING: This will consume API quota quickly.");
+                console.log("Text-to-Speech Enabled.");
+                initAudio();
             } else {
                 console.log("Text-to-Speech Disabled. Typing sound effects enabled.");
             }
         }
         
-        document.addEventListener('DOMContentLoaded', updateTtsIcon);
-
-
         // --- Utility Functions ---
 
-        /**
-         * Generic error handler to display a message in a custom modal.
-         */
         function displayError(message) {
             errorMessage.textContent = message;
             errorModal.classList.remove('hidden');
             systemStatusSpan.textContent = "Status: Error";
         }
 
-        /**
-         * Helper function for fetching with exponential backoff retry.
-         */
         async function fetchWithRetry(url, options, maxRetries = 3, delay = 1000) {
             for (let i = 0; i < maxRetries; i++) {
                 try {
@@ -468,11 +491,9 @@
             }
         }
         
-        /**
-         * Renders a new message bubble (and returns the text span for model messages).
-         */
         function displayMessage(text, role, files = null) {
-            if (chatHistory.length > 0 || role === 'user' || text.trim() !== '') {
+            // Check if there is actual content in the main chat area (excluding the initial box)
+            if (chatHistoryDiv.children.length > 0 || role === 'user' || text.trim() !== '') {
                 initialMessageBox.classList.add('hidden');
             }
 
@@ -480,17 +501,17 @@
             messageWrapper.className = `flex flex-col ${role === 'user' ? 'items-end' : 'items-start'} w-full`;
 
             const bubble = document.createElement('div');
-            // Use the same bubble classes, but add margin-top for spacing
-            bubble.className = `${role}-bubble mt-3`; 
+            const bubbleRoleClass = role === 'user' ? 'user-bubble' : 'model-bubble';
+            bubble.className = `${bubbleRoleClass} mt-3`; 
 
             // Display attached files (if any)
             if (files && files.length > 0) {
                 const fileContainer = document.createElement('div');
-                fileContainer.className = 'flex flex-wrap gap-2 mb-2 p-1 border-b border-gray-300 dark:border-gray-600';
+                fileContainer.className = 'flex flex-wrap gap-2 mb-2 p-1 border-b border-gray-300';
                 
                 files.forEach(file => {
                     const fileItem = document.createElement('div');
-                    const icon = `<svg class="w-4 h-4 mr-1 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.57 6.57a4.5 4.5 0 01-6.364-6.364l6.57-6.57a6 6 0 018.485 8.485l-6.57 6.57a3 3 0 01-4.243-4.243l6.57-6.57"></path></svg>`;
+                    const icon = `<svg class="w-4 h-4 mr-1 ${document.body.classList.contains('dark') ? 'text-gray-400' : 'text-indigo-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.57 6.57a4.5 4.5 0 01-6.364-6.364l6.57-6.57a6 6 0 018.485 8.485l-6.57 6.57a3 3 0 01-4.243-4.243l6.57-6.57"></path></svg>`;
 
                     if (file.mimeType.startsWith('image/')) {
                          // Display image preview
@@ -500,7 +521,8 @@
                         fileContainer.appendChild(img);
                     } else {
                         // Display generic file name
-                        fileItem.className = 'text-xs flex items-center bg-gray-200 dark:bg-gray-700 p-1 rounded-md';
+                        const bgColor = document.body.classList.contains('dark') ? 'bg-gray-800' : 'bg-gray-200';
+                        fileItem.className = `text-xs flex items-center ${bgColor} p-1 rounded-md`;
                         fileItem.innerHTML = icon + `<span class="truncate">${file.name || file.mimeType}</span>`;
                         fileContainer.appendChild(fileItem);
                     }
@@ -514,17 +536,13 @@
             
             messageWrapper.appendChild(bubble);
             chatHistoryDiv.appendChild(messageWrapper);
-            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; 
+            // UPDATED: Scroll the wrapper element
+            chatScrollWrapper.scrollTop = chatScrollWrapper.scrollHeight; 
             
             return textSpan;
         }
 
-        /**
-         * Handles TTS synthesis and playback.
-         * @returns {Promise<HTMLAudioElement | null>} A promise that resolves to the Audio element or null if disabled/failed.
-         */
         async function generateAndPlayTts(text) {
-            // CRITICAL CHECK: Use TTS_MIN_LENGTH (which is now 1)
             if (text.length < TTS_MIN_LENGTH) {
                 return null;
             }
@@ -537,7 +555,6 @@
                     generationConfig: {
                         responseModalities: ["AUDIO"],
                         speechConfig: {
-                            // Using a good voice for conversational tone
                             voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } 
                         }
                     },
@@ -566,31 +583,33 @@
                     const audioUrl = URL.createObjectURL(wavBlob);
                     
                     const audioPlayer = new Audio(audioUrl);
-                    audioPlayer.play().catch(e => console.error("Error playing audio:", e));
+                    audioPlayer.play().catch(e => {
+                        console.error("Error playing audio (Browser blocked autoplay?):", e);
+                        systemStatusSpan.textContent = "Status: Audio Playback Blocked";
+                    });
                     
                     systemStatusSpan.textContent = "Status: Speaking reply...";
                     return audioPlayer;
 
                 } else {
                     console.warn("TTS generation failed or returned invalid format. Proceeding without speech.");
+                    systemStatusSpan.textContent = "Status: TTS API Failed";
                     return null;
                 }
 
             } catch (e) {
                 console.error("TTS API call failed:", e);
-                // Display specific quota error if identifiable
-                const errorMessage = e.message.includes("Quota exceeded") ? "TTS Failed: API Quota Exceeded. Please try later or disable TTS." : `TTS API call failed: ${e.message}`;
+                let errorMessage = `TTS API call failed: ${e.message}`;
+                if (e.message.includes("Quota exceeded")) {
+                     errorMessage = "TTS Failed: API Quota Exceeded. Please try later or disable TTS.";
+                }
                 console.error(errorMessage);
-
-                // No modal here, just log and fallback to normal typing
+                systemStatusSpan.textContent = errorMessage; 
                 return null;
             }
         }
 
 
-        /**
-         * Renders text using a typewriter effect.
-         */
         async function typewriterEffect(targetElement, text, delay) {
             const cursor = document.createElement('span');
             cursor.className = 'typing-cursor';
@@ -602,17 +621,14 @@
                 
                 playTypingSound(); 
                 
-                chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight; 
+                // UPDATED: Scroll the wrapper element
+                chatScrollWrapper.scrollTop = chatScrollWrapper.scrollHeight; 
                 await new Promise(resolve => setTimeout(resolve, delay));
             }
             
             targetElement.removeChild(cursor); 
         }
 
-
-        /**
-         * Saves a message to the local chatHistory array and triggers display.
-         */
         async function saveUserMessage(text, files) {
             const parts = [];
             
@@ -629,16 +645,12 @@
             displayMessage(text, 'user', files);
         }
 
-        /**
-         * Clears all local chat history.
-         */
         window.clearHistory = function() {
             chatHistory = []; 
             chatHistoryDiv.innerHTML = ''; 
             
-            // Restore initial welcome message
             initialMessageBox.classList.remove('hidden');
-            chatHistoryDiv.appendChild(initialMessageBox);
+            chatScrollWrapper.prepend(initialMessageBox); // Prepend initial message box back to the wrapper
             clearFiles();
 
             systemStatusSpan.textContent = "Status: New Chat Started";
@@ -649,11 +661,8 @@
         }
 
 
-        // --- File Handling (Multi-File) ---
+        // --- File Handling ---
 
-        /**
-         * Clears the file preview and the global state.
-         */
         window.clearFiles = function() {
             uploadedFiles = [];
             fileInput.value = '';
@@ -662,9 +671,6 @@
             userInput.focus();
         }
 
-        /**
-         * Reads the uploaded files and updates the preview/global state.
-         */
         window.previewFiles = function(event) {
             const files = event.target.files;
             if (files.length === 0) {
@@ -698,12 +704,15 @@
                         name: file.name
                     });
 
-                    // Update the list view for file names
                     const listItem = document.createElement('div');
                     listItem.className = 'flex items-center space-x-2';
+                    const isDark = document.body.classList.contains('dark');
+
+                    const iconColor = isDark ? 'text-gray-400' : 'text-indigo-500';
+
                     const icon = file.type.startsWith('image/') 
                         ? `<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`
-                        : `<svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 2H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
+                        : `<svg class="w-4 h-4 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 2H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>`;
                     
                     listItem.innerHTML = icon + `<span class="truncate">${file.name}</span>`;
                     fileListDiv.appendChild(listItem);
@@ -718,6 +727,7 @@
                 reader.readAsDataURL(file);
             }
 
+            applyTheme(currentTheme); // Re-apply theme to update file preview colors
             filePreviewArea.classList.remove('hidden');
             userInput.focus();
         }
@@ -763,9 +773,6 @@
 
         // --- Main Send Message Function ---
 
-        /**
-         * Main function to send a message and get an AI response.
-         */
         window.sendMessage = async function() {
             const userQuery = userInput.value.trim();
             const currentFiles = [...uploadedFiles]; 
@@ -842,14 +849,11 @@
                 let typingDelay = TYPING_DELAY;
 
                 if (isTtsEnabled) {
-                    // Start TTS generation only if the response is long enough (TTS_MIN_LENGTH is 1)
                     if (modelResponseText.length >= TTS_MIN_LENGTH) {
                         audioPlayer = await generateAndPlayTts(modelResponseText);
                         if (audioPlayer) {
                             typingDelay = TTS_TYPING_SPEED; 
-                        } else {
-                            systemStatusSpan.textContent = "Status: TTS Failed, Typing normally...";
-                        }
+                        } 
                     } 
                 }
 
@@ -863,12 +867,10 @@
             } catch (error) {
                 console.error("API Error:", error);
                 
-                // Remove the empty bubble if an error occurred during fetching
                 if (modelTextElement.parentNode) {
                     modelTextElement.parentNode.remove();
                 }
                 
-                // Display specific quota error if identifiable
                 let displayMsg = `API connection error: ${error.message}. Please check the console for details.`;
                 if (error.message.includes("Quota exceeded")) {
                      displayMsg = "API Quota Exceeded. Please try later or use the volume button to disable TTS and rely on text-only replies.";
@@ -880,33 +882,39 @@
                 sendBtn.classList.remove('opacity-70', 'cursor-not-allowed');
                 userInput.focus();
                 
-                // Cleanup audio and restore status
                 if (audioPlayer) {
                     audioPlayer.onended = () => {
                         systemStatusSpan.textContent = "Status: Ready";
                         URL.revokeObjectURL(audioPlayer.src);
                     };
-                    // Set status to Ready if audio is already paused/ended (e.g., if it failed to play or was very fast)
                     if (audioPlayer.paused || audioPlayer.readyState === 4) {
                        systemStatusSpan.textContent = "Status: Ready";
                     }
                 } else {
-                    systemStatusSpan.textContent = "Status: Ready";
+                    if (!systemStatusSpan.textContent.includes("Quota Exceeded") && 
+                        !systemStatusSpan.textContent.includes("API Failed") &&
+                        !systemStatusSpan.textContent.includes("Playback Blocked")) {
+                       systemStatusSpan.textContent = "Status: Ready";
+                    }
                 }
             }
         }
         
         /**
-         * Initialize the chat
+         * Initialize the chat and apply saved theme
          */
         document.addEventListener('DOMContentLoaded', () => {
-            if (chatHistoryDiv.children.length === 1 && chatHistoryDiv.children[0].id === 'initial-message-box') {
-                initialMessageBox.classList.remove('hidden');
-            } else if (chatHistoryDiv.children.length > 1) {
-                initialMessageBox.classList.add('hidden');
+            const hasOnlyInitialMessage = initialMessageBox && initialMessageBox.parentNode === chatScrollWrapper;
+            
+            if (!hasOnlyInitialMessage && chatHistoryDiv.children.length === 0) {
+                 // If the history div is empty, but the page loaded, ensure the initial message is visible if it wasn't rendered yet
+                 initialMessageBox.classList.remove('hidden');
+            } else if (chatHistoryDiv.children.length > 0) {
+                 initialMessageBox.classList.add('hidden');
             }
-            // Ensure TTS icon state is correct on load
-            updateTtsIcon();
+            
+            // Apply the saved theme on load
+            applyTheme(currentTheme); 
         });
 
     </script>
