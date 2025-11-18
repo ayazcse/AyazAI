@@ -17,6 +17,12 @@
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
         }
+        .page-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 12px;
+}
+
         
         /* Define Light Mode Variables */
         :root {
@@ -129,6 +135,7 @@
 </head>
 <!-- UPDATED: Set body to full height and use flex column layout, preventing body scrolling -->
 <body class="p-0 flex flex-col h-screen overflow-hidden">
+    <div class="page-wrapper">
 
     <!-- 1. Header (FIXED AT TOP - flex-shrink-0) -->
     <header class="themed-header flex-shrink-0 w-full max-w-4xl mx-auto p-4 md:p-6 border-b flex justify-between items-center flex-wrap gap-4 z-10 shadow-md">
@@ -922,5 +929,6 @@
         });
 
     </script>
+        </div>
 </body>
 </html>
